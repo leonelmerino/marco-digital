@@ -34,11 +34,11 @@ con cada prueba en el dispositivo.
 | `visibilitychange` al bloquear y desbloquear | Sí (23-10-2026) | Bloqueo de ~3 min; hora correcta al volver |
 | `crypto.subtle` (necesario para PKCE en la fase 3) | Detectado (23-10-2026) | Falta probar `digest('SHA-256')` |
 | Cambio de orientación | Sí (23-10-2026) | |
-| Radio: estaciones suenan | En parte (23-10-2026) | Corazón, Futuro, Bío-Bío y Concierto; faltan las demás |
+| Radio: estaciones suenan | En parte (24-10-2026) | Además: Imagina, Activa, Pudahuel, Carolina, Cooperativa, FMDOS (al escanear); faltan Rock & Pop, ADN, Agricultura y Beethoven |
 | Radio con la pantalla bloqueada | Sí (23-10-2026) | Siguió sonando |
 | Radio: reconexión tras modo avión | Sí (23-10-2026) | Se cortó a los ~8 s y volvió sola al recuperar la red |
-| Radio: `play()` sin toque al escanear | Pendiente | Necesario para pasar de estación sola |
-| Radio: dos `<audio>` a la vez (uno silenciado) | Pendiente | Escaneo sin silencios; si falla se ve «escaneo con un canal» en el diagnóstico |
+| Radio: `play()` sin toque al escanear | Sí (24-10-2026) | Cambia de estación sola cada 5 s |
+| Radio: dos `<audio>` a la vez (uno silenciado) | Sí (24-10-2026) | Escaneo sin silencios; `muted` funciona en iOS 12 |
 | Funcionamiento continuo durante varias horas | Pendiente | |
 
 El panel de diagnóstico (Configuración › Estado y diagnóstico) muestra la
