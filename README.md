@@ -10,10 +10,10 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 
 | Fase | Contenido | Estado |
 | --- | --- | --- |
-| 1 | Reloj, fotos de prueba, fundido, controles, configuración | Implementada; **pendiente de validar en el iPad** |
+| 1 | Reloj, fotos de prueba, fundido, controles, configuración | Validada en el iPad (falta la prueba de varias horas) |
 | 2 | Publicación en GitHub Pages | Publicada; pendiente de validar en el iPad |
 | 3 | Fotos desde una carpeta privada de Dropbox (OAuth 2.0 + PKCE) | Sin empezar |
-| 4 | Música gratuita desde Internet Archive | Sin empezar |
+| 4 | Radio por internet: estaciones predefinidas (sustituye a Internet Archive) | Sin empezar |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
 Una fase solo se da por terminada después de probarla en el iPad real

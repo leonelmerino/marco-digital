@@ -23,13 +23,14 @@ con cada prueba en el dispositivo.
 
 | Capacidad | Comprobado en el iPad | Resultado |
 | --- | --- | --- |
-| Carga de la página y scripts sin errores | Pendiente | |
-| `object-fit` en `<img>` | Pendiente | |
-| Transición de `opacity` | Pendiente | |
-| `localStorage` en pestaña normal | Pendiente | |
+| Carga de la página y scripts sin errores | Sí (23-10-2026) | Sin errores. Safari 12.1.2 |
+| `object-fit` en `<img>` | Sí (23-10-2026) | Detectado y visualmente correcto |
+| Transición de `opacity` | Sí (23-10-2026) | Fundido correcto |
+| `localStorage` en pestaña normal | Sí (23-10-2026) | |
 | `localStorage` desde la pantalla de inicio | Pendiente | |
-| `visibilitychange` al bloquear y desbloquear | Pendiente | |
-| `crypto.subtle` (necesario para PKCE en la fase 3) | Pendiente | |
+| `visibilitychange` al bloquear y desbloquear | Sí (23-10-2026) | Bloqueo de ~3 min; hora correcta al volver |
+| `crypto.subtle` (necesario para PKCE en la fase 3) | Detectado (23-10-2026) | Falta probar `digest('SHA-256')` |
+| Cambio de orientación | Sí (23-10-2026) | |
 | Funcionamiento continuo durante varias horas | Pendiente | |
 
 El panel de diagnóstico (Configuración › Estado y diagnóstico) muestra la
