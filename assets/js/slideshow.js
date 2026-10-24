@@ -29,6 +29,7 @@
   var shownAt = 0;
   var failures = 0;
   var seq = 0;             // invalida cargas obsoletas
+  var showing = false;     // la foto actual se está cargando en la capa oculta
   var opts = { interval: 30, order: 'random', transition: 'fade' };
   var emptyEl;
   var onShow = null;
@@ -106,6 +107,10 @@
       if (done) done(true);
       return;
     }
+    if (el._key === key && el._state === 'loading') {
+      el._done = done; // ya se está descargando: no empezar de nuevo
+      return;
+    }
     el._key = key;
     el._state = 'loading';
     el._done = done;
@@ -132,6 +137,7 @@
     var my = ++seq;
     var photo = photoAt(pos);
     var el = backLayer();
+    showing = true;
     if (el._key === keyOf(photo) && el._state === 'loading') {
       // La precarga sigue en curso: reutilizarla en vez de reiniciar la descarga.
       el._done = function (ok) {
@@ -153,6 +159,7 @@
     oldFront.className = 'layer';
     front = 1 - front;
     failures = 0;
+    showing = false;
     emptyEl.className = 'empty hidden';
     if (onShow) onShow(photo);
     Frame.compat.log('Mostrando ' + photo.name);
@@ -167,7 +174,8 @@
     clearTimeout(preloadTimer);
     var my = seq;
     preloadTimer = setTimeout(function () {
-      if (my !== seq) return;
+      // Nunca precargar en la capa donde todavía se carga la foto actual.
+      if (my !== seq || showing) return;
       ensureAhead();
       var next = photoAt(pos + 1);
       if (next) loadInto(backLayer(), next, null);
@@ -175,6 +183,7 @@
   }
 
   function failed(photo) {
+    showing = false;
     failures++;
     Frame.compat.log('No se pudo cargar ' + photo.name, true);
     if (failures >= photos.length) {
@@ -224,6 +233,7 @@
     order = [];
     pos = -1;
     failures = 0;
+    showing = false;
     if (!photos.length) {
       showEmpty(emptyMessage || 'No hay fotografías para mostrar.');
       return;
@@ -252,6 +262,7 @@
       seq++;
       order = [];
       pos = -1;
+      showing = false;
       showEmpty('No hay fotografías para mostrar.');
       return;
     }
@@ -268,8 +279,9 @@
     }
     pos = ci >= 0 ? 0 : -1; // si la actual desapareció, la siguiente es order[0]
     ensureAhead();
-    // Esperar al final del fundido antes de tocar la capa oculta.
-    if (playing) schedulePreload(Math.max(50, FADE_MS - (Date.now() - shownAt)));
+    // Esperar al final del fundido antes de tocar la capa oculta; si la foto
+    // actual aún se está cargando, reveal() programará la precarga.
+    if (playing && !showing) schedulePreload(Math.max(50, FADE_MS - (Date.now() - shownAt)));
   }
 
   function configure(settings) {

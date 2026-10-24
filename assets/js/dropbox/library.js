@@ -112,8 +112,9 @@
       return Frame.dropboxApi.rpc('files/list_folder/continue', { cursor: cursor })
         .then(function (next) { return page(next, my); });
     }
-    if (listing) log('lista completa: ' + statusText());
+    var wasListing = listing;
     listing = false;
+    if (wasListing) log('lista completa: ' + statusText());
     onStatus(statusText(), false);
     clearTimeout(refreshTimer);
     refreshTimer = setTimeout(function () { if (my === gen) refresh(); }, REFRESH_MS);
