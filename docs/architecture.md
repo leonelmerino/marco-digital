@@ -25,6 +25,9 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `dropbox/config.js` | `Frame.dropboxConfig` | App key pública. |
 | `dropbox/auth.js` | `Frame.dropboxAuth` | OAuth 2.0 + PKCE, renovación del token, carpeta elegida. |
 | `dropbox/api.js` | `Frame.dropboxApi` | Llamadas a la API (JSON) y miniaturas (Blob), con renovación y espera. |
+| `dropbox/photo-index.js` | `Frame.photoIndex` | Fecha y país de cada foto, en segundo plano (~3 por segundo), guardados en IndexedDB. |
+| `photo-filter.js` | `Frame.photoFilter` | Filtro por país y rango de años; cifras para el panel. |
+| `filter-ui.js` | `Frame.filterUI` | Panel «Filtrar fotos»: países, barras por año y deslizador doble táctil. |
 | `dropbox/library.js` | `Frame.dropboxLibrary` | Lista por páginas, muestreo, cambios cada 30 min, cargador de miniaturas con fecha y ubicación, explorador. |
 | `app.js` | — | Arranque, controles, configuración, radio, conectividad, ciclo de vida. |
 

@@ -174,28 +174,12 @@
     cursor = null;
   }
 
-  // Fecha y lugar de la foto (files/get_metadata con include_media_info; la
-  // lista de la carpeta ya no los trae). Se guardan en photo.info; si Dropbox
-  // aún los está preparando (`pending`), se vuelven a pedir la próxima vez.
-  // Un fallo aquí nunca impide mostrar la foto.
+  // Fecha y lugar de la foto, del índice (photo-index.js) o de Dropbox. Un
+  // fallo aquí nunca impide mostrar la foto.
   function fetchInfo(photo) {
     if (photo.info && !photo.info.pending) return Promise.resolve();
-    return Frame.dropboxApi.rpc('files/get_metadata', {
-      path: photo.path,
-      include_media_info: true
-    }).then(function (meta) {
-      var media = meta.media_info;
-      var data = media && media['.tag'] === 'metadata' ? media.metadata : null;
-      var loc = data && data.location;
-      var size = data && data.dimensions;
-      photo.info = {
-        taken: (data && data.time_taken) || meta.client_modified || null,
-        lat: loc ? loc.latitude : null,
-        lon: loc ? loc.longitude : null,
-        width: size ? size.width : 0,
-        height: size ? size.height : 0,
-        pending: !!media && media['.tag'] === 'pending'
-      };
+    return Frame.photoIndex.lookup(photo).then(function (rec) {
+      photo.info = rec;
     }, function (err) {
       log('datos de ' + photo.name + ': ' + (err.summary || err.message), true);
     });
@@ -253,6 +237,7 @@
     stop: stop,
     refresh: function () { if (folder && !listing) refresh(); },
     load: load,
-    browse: browse
+    browse: browse,
+    photos: function () { return photos; }
   };
 })(window);

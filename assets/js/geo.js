@@ -132,7 +132,8 @@
 
   function countryName(cc) { return countries[cc] || cc; }
 
-  // Devuelve { city, country } (city puede ser ''), o null si no hay datos o
+  // Devuelve { city, country, code } (city puede ser ''; code es el código
+  // ISO del país), o null si no hay datos o
   // el punto está en el mar, lejos de toda ciudad.
   function place(lat, lon) {
     if (state !== 'ready' || typeof lat !== 'number' || typeof lon !== 'number') return null;
@@ -158,8 +159,8 @@
       }
     }
     if (best < 0 && nearestKm <= NEAREST_KM) best = nearest;
-    if (best >= 0) return { city: names[best], country: countryName(codes[best]) };
-    return cc ? { city: '', country: countryName(cc) } : null;
+    if (best >= 0) return { city: names[best], country: countryName(codes[best]), code: codes[best] };
+    return cc ? { city: '', country: countryName(cc), code: cc } : null;
   }
 
   Frame.geo = {
@@ -170,6 +171,7 @@
       load();
     },
     isReady: function () { return state === 'ready'; },
-    place: place
+    place: place,
+    countryName: function (cc) { return state === 'ready' ? countryName(cc) : cc; }
   };
 })(window);

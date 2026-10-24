@@ -240,6 +240,60 @@ body.controls-visible .controls { opacity: 1; pointer-events: auto; }
 .radio-status.error { color: #ff6b5b; }
 .row input[type="range"] { width: 55%; margin-left: 16px; }
 
+/* ---------- Filtro ---------- */
+
+.filter-total { font-size: 20px; font-weight: 600; padding: 4px 0 0; }
+.picks { padding: 6px 0; }
+.pick {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #2c2c2e;
+  color: #f2f2f2;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+.pick.active { border-color: #0a84ff; background: #1f3550; }
+.pick-count { float: right; color: #8e8e93; font-variant-numeric: tabular-nums; }
+
+.years { padding: 8px 0 4px; }
+.year-chart { position: relative; height: 70px; }
+/* Las barras y el deslizador comparten márgenes para que cada año quede
+   alineado con su posición en el deslizador. */
+.year-inner { position: absolute; top: 0; bottom: 0; left: 18px; right: 18px; }
+.year-bars { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+.bar {
+  position: absolute;
+  bottom: 0;
+  background: #48484a;
+  border-radius: 2px 2px 0 0;
+}
+.bar.on { background: #0a84ff; }
+.range2 { position: relative; height: 44px; touch-action: none; cursor: pointer; }
+.range2-track, .range2-fill {
+  position: absolute;
+  top: 20px;
+  height: 4px;
+  border-radius: 2px;
+}
+.range2-track { left: 0; right: 0; background: #48484a; }
+.range2-fill { background: #0a84ff; }
+.range2-thumb {
+  position: absolute;
+  top: 8px;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  border-radius: 14px;
+  background: #f2f2f2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+.year-ends { font-size: 14px; color: #8e8e93; padding: 0 4px; overflow: hidden; }
+.year-max { float: right; }
+
 .radio-stations { padding: 8px 0 4px; font-size: 0; /* sin huecos entre inline-block */ }
 .station {
   display: inline-block;

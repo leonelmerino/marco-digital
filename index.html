@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#000000">
   <title>Marco digital</title>
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="assets/css/styles.css?v=6">
+  <link rel="stylesheet" href="assets/css/styles.css?v=7">
 </head>
 <body class="controls-visible">
   <!-- Modo marco: dos capas para el fundido, cada una con una a tres fotos -->
@@ -35,6 +35,7 @@
     <button type="button" id="btn-play" class="ctl ctl-wide ctl-toggle on" aria-label="Pausar fotos">&#10074;&#10074; Fotos</button>
     <button type="button" id="btn-radio-play" class="ctl ctl-wide ctl-toggle" aria-label="Escuchar radio">&#9654;&#xFE0E; Radio</button>
     <button type="button" id="btn-radio" class="ctl ctl-wide">&#9834; Estaciones</button>
+    <button type="button" id="btn-filter" class="ctl ctl-wide hidden">&#128205; Todas</button>
     <button type="button" id="btn-settings" class="ctl ctl-wide">Configuración</button>
   </div>
 
@@ -65,6 +66,44 @@
       <p class="note">Señales oficiales en directo de cada emisora. El marco no graba ni guarda audio.
         La radio empieza solo cuando tocas una estación o &#9654;.
         Escanear pasa por todas las estaciones, 5 segundos cada una; toca cualquier cosa para quedarte en la que suena.</p>
+    </div>
+  </div>
+
+  <!-- Filtro de fotos por país y años -->
+  <div id="filter-sheet" class="settings hidden" role="dialog" aria-labelledby="filter-title">
+    <div class="settings-panel">
+      <div class="settings-head">
+        <h1 id="filter-title">Filtrar fotos</h1>
+        <button type="button" id="btn-filter-close" class="btn-primary">Listo</button>
+      </div>
+      <div id="filter-total" class="filter-total"></div>
+      <p id="filter-progress" class="note"></p>
+      <section>
+        <h2>Años</h2>
+        <div id="filter-years" class="years hidden">
+          <div class="year-chart">
+            <div class="year-inner"><div id="year-bars" class="year-bars"></div></div>
+          </div>
+          <div id="year-slider" class="range2">
+            <div id="year-inner" class="year-inner">
+              <div class="range2-track"></div>
+              <div id="year-fill" class="range2-fill"></div>
+              <div id="year-thumb-0" class="range2-thumb"></div>
+              <div id="year-thumb-1" class="range2-thumb"></div>
+            </div>
+          </div>
+          <div class="year-ends"><span id="year-min"></span><span id="year-max" class="year-max"></span></div>
+        </div>
+        <p id="filter-years-empty" class="note">Los años aparecerán a medida que se revisen las fotos.</p>
+        <p class="note">Con un rango de años, las fotos sin fecha de la toma (escaneos, WhatsApp) no se muestran.</p>
+      </section>
+      <section>
+        <h2>País</h2>
+        <div id="filter-countries" class="picks"></div>
+      </section>
+      <div class="row-buttons">
+        <button type="button" id="btn-filter-clear">Quitar filtro</button>
+      </div>
     </div>
   </div>
 
@@ -230,21 +269,24 @@
   <!-- Scripts clásicos (sin módulos ni compilación) para Safari de iOS 12.
        ?v=N: subirlo en cada publicación para que el iPad no mezcle archivos
        nuevos con otros guardados en caché. -->
-  <script src="assets/js/compatibility.js?v=6"></script>
-  <script src="assets/js/storage.js?v=6"></script>
-  <script src="assets/js/radio/stations.js?v=6"></script>
-  <script src="assets/js/settings.js?v=6"></script>
-  <script src="assets/js/clock.js?v=6"></script>
-  <script src="assets/js/slideshow.js?v=6"></script>
-  <script src="assets/js/geo.js?v=6"></script>
-  <script src="assets/js/photo-info.js?v=6"></script>
-  <script src="assets/js/sample-photos.js?v=6"></script>
-  <script src="assets/js/radio/radio-player.js?v=6"></script>
-  <script src="assets/js/vendor/qrcode.js?v=6"></script>
-  <script src="assets/js/dropbox/config.js?v=6"></script>
-  <script src="assets/js/dropbox/auth.js?v=6"></script>
-  <script src="assets/js/dropbox/api.js?v=6"></script>
-  <script src="assets/js/dropbox/library.js?v=6"></script>
-  <script src="assets/js/app.js?v=6"></script>
+  <script src="assets/js/compatibility.js?v=7"></script>
+  <script src="assets/js/storage.js?v=7"></script>
+  <script src="assets/js/radio/stations.js?v=7"></script>
+  <script src="assets/js/settings.js?v=7"></script>
+  <script src="assets/js/clock.js?v=7"></script>
+  <script src="assets/js/slideshow.js?v=7"></script>
+  <script src="assets/js/geo.js?v=7"></script>
+  <script src="assets/js/photo-info.js?v=7"></script>
+  <script src="assets/js/sample-photos.js?v=7"></script>
+  <script src="assets/js/radio/radio-player.js?v=7"></script>
+  <script src="assets/js/vendor/qrcode.js?v=7"></script>
+  <script src="assets/js/dropbox/config.js?v=7"></script>
+  <script src="assets/js/dropbox/auth.js?v=7"></script>
+  <script src="assets/js/dropbox/api.js?v=7"></script>
+  <script src="assets/js/dropbox/library.js?v=7"></script>
+  <script src="assets/js/dropbox/photo-index.js?v=7"></script>
+  <script src="assets/js/photo-filter.js?v=7"></script>
+  <script src="assets/js/filter-ui.js?v=7"></script>
+  <script src="assets/js/app.js?v=7"></script>
 </body>
 </html>

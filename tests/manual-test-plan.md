@@ -68,6 +68,10 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 48 | Fotos verticales | Con Dropbox conectado, esperar varias vistas | Las verticales salen de a dos, lado a lado, o una vertical con dos horizontales apiladas; cada foto con su lugar y fecha | |
 | 49 | Grilla: desactivar | Configuración › Agrupar fotos verticales: desactivar | Desde la vista siguiente, cada foto sale sola | |
 | 50 | Grilla y memoria | Dejar el marco 1 h con la grilla activa | No se recarga sola ni queda en negro | |
+| 51 | Filtro: índice | Con Dropbox conectado, tocar 📍 Todas | Dice «Revisando fotos: N de M»; tras unos minutos los números crecen y aparecen países y barras de años | |
+| 52 | Filtro: país y años | Elegir un país, arrastrar los dos extremos del deslizador, Listo | El botón dice «📍 País · AAAA–AAAA» en azul; solo salen fotos de ese país y esos años | |
+| 53 | Filtro: recarga | Configuración › Recargar página | El filtro sigue; el panel no vuelve a 0 % | |
+| 54 | Filtro: quitar | Panel › Quitar filtro › Listo | Vuelven todas las fotos; el botón dice «📍 Todas» | |
 | 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 
 ## Cómo registrar un fallo

@@ -23,7 +23,13 @@
 
 Las coordenadas GPS de cada foto llegan de Dropbox y se convierten en ciudad y
 país dentro del iPad, con la tabla `assets/js/data/cities.js`. No se envían a
-ningún servicio de mapas ni se guardan.
+ningún servicio de mapas.
+
+Para el filtro, el índice guarda en IndexedDB (base `marco-digital`), por cada
+foto, su ruta en Dropbox, fecha, coordenadas, medidas y país. Son datos
+personales: solo los lee esta página (mismo origen) y «Desconectar» los borra.
+Igual que el token de renovación, otra página publicada en
+`leonelmerino.github.io` podría leerlos (ver más abajo).
 
 ## Dropbox
 

@@ -102,6 +102,27 @@ https://github.com/nvkelso/natural-earth-vector (v5.1.2), y ejecutar
 `node tools/build-cities.js <carpeta-geonames> <archivo-geojson>`. Después,
 subir `?v=` de `DATA_URL` en `geo.js`.
 
+## Filtro por país y años
+
+**📍** en los controles abre «Filtrar fotos»: país (de más a menos fotos, y
+«Sin ubicación») y un rango de años con un deslizador doble y barras con las
+fotos de cada año (del país elegido). Lo elegido se aplica con «Listo» y se
+recuerda; el botón muestra el filtro («📍 Francia · 2016–2020») y se pone azul.
+
+- **Índice** (`photo-index.js`): como Dropbox solo da la fecha y el GPS foto a
+  foto, el marco los pide en segundo plano, dos consultas a la vez con 0,3 s
+  de pausa (unas 3 por segundo con la latencia real; ~4 h para 41 000 fotos,
+  solo la primera vez). Se guardan en IndexedDB con el país ya calculado; al
+  reabrir solo se piden las fotos nuevas. Si iOS borra los datos, se rehace.
+  Sin IndexedDB, dura mientras la página esté abierta.
+- Con filtro solo cuentan las fotos ya revisadas; la presentación se
+  actualiza cada 20 s mientras el índice avanza. Si todavía no hay ninguna, el
+  marco avisa «Buscando fotos de …».
+- El año es el de la fecha de la toma. Con un rango de años, las fotos sin
+  ella (escaneos, WhatsApp) quedan fuera; en los extremos del deslizador el
+  rango queda abierto («desde 2015», «hasta 2018»).
+- «Desconectar» borra el índice y el filtro.
+
 ## Errores
 
 | Situación | Qué hace el marco |
@@ -136,4 +157,10 @@ subir `?v=` de `DATA_URL` en `geo.js`.
   cronológico): V+V, H, V+H+H, V+V (la H intermedia pasa después), H, H, V+V,
   como se esperaba. Con 42 000 fotos llegando por páginas y miniaturas de
   2,5 s, la primera vista sale a los 4 s y no se repiten descargas.
-- **Pendiente:** HEIC, grilla en el iPad.
+- En el iPad: grilla correcta tras «Recargar página».
+- Filtro, con Dropbox simulado (120 fotos en Chile, Argentina, Francia y sin
+  ubicación, 2012–2024): índice completo en ~20 s con 60 ms por consulta;
+  «Francia · 2016–2020» muestra solo esas fotos; al recargar, el filtro sigue
+  y no se repite ninguna consulta (índice desde IndexedDB); el deslizador
+  responde a toques simulados; borrar el índice deja IndexedDB vacío.
+- **Pendiente:** HEIC, filtro en el iPad, velocidad real del índice.

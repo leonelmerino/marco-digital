@@ -72,6 +72,10 @@
     });
     $('btn-settings').addEventListener('click', openSettings);
     $('btn-radio').addEventListener('click', openRadio);
+    $('btn-filter').addEventListener('click', function () {
+      hideControls();
+      Frame.filterUI.open();
+    });
   }
 
   // ---- Radio ----
@@ -205,21 +209,61 @@
   var library = { text: '', error: false, count: 0 };
   var picker = { path: '', display: '', seq: 0 };
   var lostConnection = false;  // Dropbox anuló el permiso guardado
+  var FILTER_REFRESH_MS = 20000;
+  var filterTimer = null;
+  var lastFiltered = -1;
+
+  function updateFilterButton(visible) {
+    var btn = $('btn-filter');
+    btn.textContent = '\uD83D\uDCCD ' + Frame.photoFilter.label();
+    btn.className = 'ctl ctl-wide' + (Frame.photoFilter.isActive() ? ' ctl-toggle on' : '') + (visible ? '' : ' hidden');
+  }
+
+  // Lleva a la presentación las fotos de la biblioteca que pasan el filtro.
+  // `restart`: empezar de nuevo (cambió el filtro), si no, solo actualizar.
+  function showLibrary(restart) {
+    var list = Frame.dropboxLibrary.photos();
+    var filtered = Frame.photoFilter.apply(list);
+    lastFiltered = filtered.length;
+    if (!filtered.length) {
+      var waiting = Frame.photoFilter.isActive() && list.length;
+      Frame.slideshow.setPhotos([], waiting
+        ? 'Buscando fotos de ' + Frame.photoFilter.label() + '… Aparecerán a medida que se revisen las fotos.'
+        : 'Buscando fotos en Dropbox…');
+    } else if (restart) {
+      Frame.slideshow.setPhotos(filtered);
+    } else {
+      Frame.slideshow.update(filtered);
+    }
+  }
+
+  // Con filtro, el índice va sumando fotos: refrescar de vez en cuando.
+  function onIndexChange() {
+    if (!Frame.photoFilter.isActive() || filterTimer) return;
+    filterTimer = setTimeout(function () {
+      filterTimer = null;
+      var n = Frame.photoFilter.apply(Frame.dropboxLibrary.photos()).length;
+      if (n !== lastFiltered) showLibrary(lastFiltered === 0);
+    }, lastFiltered === 0 ? 2000 : FILTER_REFRESH_MS);
+  }
 
   function startPhotos() {
     var folder = Frame.dropboxAuth.isConnected() ? Frame.dropboxAuth.getFolder() : null;
     library = { text: '', error: false, count: 0 };
+    updateFilterButton(!!folder);
     if (!folder) {
       Frame.dropboxLibrary.stop();
+      Frame.photoIndex.stop();
       Frame.slideshow.setPhotos(Frame.samplePhotos);
       updateDropboxUI();
       return;
     }
     Frame.slideshow.setPhotos([], 'Buscando fotos en Dropbox…');
+    Frame.photoIndex.start(Frame.dropboxLibrary.photos);
     Frame.dropboxLibrary.start(folder, Frame.settings.get().dropboxRecursive, {
       onUpdate: function (list) {
         library.count = list.length;
-        Frame.slideshow.update(list);
+        showLibrary(false);
       },
       onStatus: function (text, isError) {
         if (!Frame.dropboxAuth.isConnected()) {
@@ -394,6 +438,8 @@
     });
     $('btn-dropbox-disconnect').addEventListener('click', function () {
       if (!global.confirm('¿Desconectar Dropbox? El marco volverá a las fotos de prueba.')) return;
+      Frame.photoIndex.clear(); // fechas y coordenadas de las fotos
+      Frame.photoFilter.set({});
       Frame.dropboxAuth.disconnect().then(startPhotos);
     });
 
@@ -478,6 +524,7 @@
     Frame.clock.refresh();
     Frame.slideshow.resume();
     Frame.radio.resume();
+    Frame.photoIndex.resume();
     updateConnectivity();
   }
 
@@ -529,16 +576,29 @@
     bindSettings();
     bindRadio(settings);
     Frame.dropboxAuth.init();
+    Frame.photoFilter.load();
+    Frame.filterUI.init(Frame.dropboxLibrary.photos, function () {
+      updateFilterButton(true);
+      showLibrary(true);
+    });
+    Frame.photoIndex.onChange(onIndexChange);
     bindDropbox();
     bindLifecycle();
     updateConnectivity();
     updatePlayButton();
 
-    finishDropboxLogin().then(startPhotos);
+    // El índice se carga antes de empezar, para que el filtro guardado
+    // encuentre las fotos ya revisadas.
+    Frame.photoIndex.init().then(finishDropboxLogin).then(startPhotos);
     showControls();
     // La tabla de ciudades (~1 MB) se carga cuando ya arrancó todo lo demás.
     setTimeout(function () {
-      Frame.geo.ready(function (ok) { if (ok) Frame.slideshow.refreshCaption(); });
+      Frame.geo.ready(function (ok) {
+        if (!ok) return;
+        Frame.slideshow.refreshCaption();
+        // El nombre del país del filtro necesita la tabla.
+        updateFilterButton(Frame.dropboxAuth.isConnected() && !!Frame.dropboxAuth.getFolder());
+      });
     }, 2000);
   }
 

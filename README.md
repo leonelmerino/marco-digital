@@ -14,8 +14,8 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | 2 | Publicación en GitHub Pages | Publicada; pendiente de validar en el iPad |
 | 3 | Fotos desde una carpeta de Dropbox (OAuth 2.0 + PKCE), también carpetas muy grandes | Conexión y carpeta de 41 000 fotos probadas en el iPad |
 | 3b | Lugar y fecha sobre cada foto (ciudad y país sin conexión) | Validada en el iPad |
-| 3c | Fotos verticales agrupadas en vistas de dos o tres fotos | Implementada; pendiente de probar en el iPad |
-| 3d | Filtro por ciudad | Sin empezar |
+| 3c | Fotos verticales agrupadas en vistas de dos o tres fotos | Validada en el iPad |
+| 3d | Filtro por país y rango de años (índice en segundo plano) | Implementada; pendiente de probar en el iPad |
 | 4 | Radio por internet: 14 estaciones chilenas predefinidas y función Escanear (sustituye a Internet Archive) | Implementada; validada en parte en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
@@ -31,19 +31,24 @@ Una fase solo se da por terminada después de probarla en el iPad real
 3. En **♪ Estaciones** eliges una estación; suena al tocarla. **Escanear**
    pasa por todas, 5 segundos cada una y sin silencios entre ellas; toca
    cualquier cosa para quedarte en la que suena. El volumen se ajusta con los botones del iPad.
-4. En **Configuración › Dropbox** conectas tu cuenta con **Conectar con el
+4. **📍 Todas** filtra las fotos por país y por rango de años (deslizador
+   doble). La primera vez el marco revisa las fotos en segundo plano (unas 4
+   horas para 40 000 fotos); las cifras crecen mientras tanto.
+5. En **Configuración › Dropbox** conectas tu cuenta con **Conectar con el
    teléfono (QR)**: escaneas el código con el iPhone, inicias sesión allí y
    escribes en el iPad el código que muestra Dropbox. Luego eliges la carpeta.
-5. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
+6. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, si se agrupan las fotos verticales, el lugar y la
    fecha de cada foto, el reloj, la fecha y el modo nocturno.
-5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
+7. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
    Bloqueo automático › Nunca**. Para que nadie salga de Safari, puedes usar
    **Acceso Guiado** (Ajustes › Accesibilidad).
 
 Opcional: en Safari, **Compartir › Añadir a pantalla de inicio** abre el marco
 sin barras de Safari. Este modo tiene su propio almacenamiento: hay que
-conectar Dropbox (con el QR) y elegir la carpeta otra vez dentro de él.
+conectar Dropbox (con el QR) y elegir la carpeta otra vez dentro de él. Al
+abrirlo desde el icono, iOS retoma la página que ya estaba abierta: para ver
+una versión nueva, **Configuración › Recargar página**.
 
 ### Parámetros de prueba
 
