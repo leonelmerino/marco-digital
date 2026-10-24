@@ -32,12 +32,34 @@
     panel.innerHTML = html;
   }
 
+  // En la red local (servidor tools/dev-server.py) cada línea del registro se
+  // envía también al Mac, para no tener que copiar nada a mano desde el iPad.
+  // En GitHub Pages no se envía nada.
+  var reportToDevServer = /^(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+)$/
+    .test(global.location.hostname);
+
+  function report(message, isError) {
+    if (!reportToDevServer) return;
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/__reporte', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({
+        hora: timestamp(),
+        texto: String(message).slice(0, 2000),
+        error: !!isError,
+        pagina: global.location.pathname + global.location.search
+      }));
+    } catch (e) { /* el diagnóstico nunca debe romper la app */ }
+  }
+
   function log(message, isError) {
     lines.push({ text: timestamp() + ' ' + message, error: !!isError });
     if (lines.length > MAX_LINES) lines.shift();
     if (global.console) {
       (isError ? console.error : console.log).call(console, '[marco] ' + message);
     }
+    report(message, isError);
     render();
   }
 

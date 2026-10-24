@@ -4,3 +4,5 @@
 # Nunca subir credenciales ni fotos personales
 .env
 *.local.*
+reports/
+__pycache__/

@@ -48,11 +48,16 @@ puede comportarse distinto con el inicio de sesión de Dropbox; hay que probarlo
 No hay dependencias ni paso de compilación. Desde la carpeta del proyecto:
 
 ```sh
-python3 -m http.server 8010 --bind 0.0.0.0
+python3 tools/dev-server.py 8010
 ```
 
 En el Mac: http://localhost:8010. En el iPad (misma red Wi-Fi):
 `http://<IP-del-Mac>:8010` (la IP se obtiene con `ipconfig getifaddr en0`).
+
+Cuando la app se abre desde la red local, envía su registro de diagnóstico al
+Mac (`POST /__reporte`), que lo guarda en `reports/ipad-log.jsonl` (ignorado
+por Git). Así se leen los errores del iPad sin copiarlos a mano. La versión de
+GitHub Pages no envía nada.
 
 Reglas del código, por compatibilidad con Safari 12:
 
