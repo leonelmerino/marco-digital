@@ -28,6 +28,9 @@
     setBodyClass('fit-cover', s.fit === 'cover');
     setBodyClass('transition-none', s.transition === 'none');
     setBodyClass('theme-night', s.theme === 'night');
+    setBodyClass('info-hidden', !s.photoInfo);
+    // La leyenda va en la esquina inferior que no ocupa el reloj.
+    setBodyClass('captions-right', s.clockVisible && s.clockPosition === 'bottom-left');
     Frame.compat.setDebugVisible(s.debug);
   }
 
@@ -511,6 +514,7 @@
 
     Frame.clock.init(settings);
     Frame.slideshow.init(settings, function (photo) { lastPhoto = photo.name; });
+    Frame.slideshow.setCaption(Frame.photoInfo.caption);
 
     Frame.settings.onChange(function (s, changed) {
       applyVisualSettings(s);
@@ -530,6 +534,10 @@
 
     finishDropboxLogin().then(startPhotos);
     showControls();
+    // La tabla de ciudades (~1 MB) se carga cuando ya arrancó todo lo demás.
+    setTimeout(function () {
+      Frame.geo.ready(function (ok) { if (ok) Frame.slideshow.refreshCaption(); });
+    }, 2000);
   }
 
   start();

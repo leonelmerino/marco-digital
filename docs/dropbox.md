@@ -68,6 +68,40 @@ que desde la red local (`http://192.168.x.x:8010`) no se puede conectar: hay
 que usar la dirección publicada. Cada dirección (Pages, localhost) guarda su
 propia conexión.
 
+## Lugar y fecha de cada foto
+
+Abajo a la izquierda (a la derecha si el reloj está abajo a la izquierda) se
+ve, en pequeño:
+
+    Santiago, Chile
+    12 de marzo de 2016 · hace 10 años
+
+- Junto con la miniatura se pide `files/get_metadata` con
+  `include_media_info: true`: fecha de la toma (`time_taken`), coordenadas
+  GPS y medidas. Es una llamada por foto, solo la primera vez que se muestra.
+  La lista de la carpeta ya no trae estos datos (Dropbox lo retiró en 2019).
+- Sin fecha de la toma se usa la fecha del archivo (`client_modified`). Sin
+  GPS (escaneos, fotos recibidas por WhatsApp) solo se ve la fecha.
+- La fecha se muestra tal como viene, sin convertir zonas horarias.
+- Si Dropbox aún está preparando los datos (`pending`), se vuelven a pedir la
+  próxima vez que salga la foto. Un fallo nunca impide mostrar la foto.
+- **Ciudad y país sin conexión** (`geo.js`): país por las fronteras de Natural
+  Earth (simplificadas a ~2 km); ciudad entre las de más de 15 000 habitantes
+  de GeoNames. Cada ciudad abarca un radio según su población (4 km a 27 km),
+  así Las Condes o Puente Alto salen como «Santiago»; fuera de todo radio vale
+  la más cercana a menos de 40 km, siempre del mismo país. Más lejos (Torres
+  del Paine, la cordillera) solo se ve el país. Las coordenadas no salen del iPad.
+- Se desactiva en Configuración › Presentación › Mostrar lugar y fecha. Las
+  fotos de prueba no tienen estos datos.
+
+Para regenerar la tabla (por ejemplo, para cambiar un nombre en
+`OVERRIDES`): descargar `cities15000.zip` y `alternateNamesV2.zip` de
+https://download.geonames.org/export/dump/ y
+`geojson/ne_50m_admin_0_countries.geojson` de
+https://github.com/nvkelso/natural-earth-vector (v5.1.2), y ejecutar
+`node tools/build-cities.js <carpeta-geonames> <archivo-geojson>`. Después,
+subir `?v=` de `DATA_URL` en `geo.js`.
+
 ## Errores
 
 | Situación | Qué hace el marco |
@@ -90,4 +124,11 @@ propia conexión.
 - QR: se lee correctamente (comprobado con el lector de códigos de Chrome) y
   Dropbox acepta la dirección sin retorno; un código inventado se rechaza con
   un mensaje claro.
-- **Pendiente:** inicio de sesión real, carpeta real, HEIC, iPad.
+- En el iPad (24-10-2026): conexión con el QR y la carpeta «Camera Uploads»
+  real, 41 246 fotos listadas en unos 70 s.
+- Lugar y fecha, con Dropbox simulado: Las Condes → «Santiago, Chile»,
+  Versalles → «París, Francia», Brooklyn → «Nueva York, Estados Unidos»,
+  Torres del Paine → «Chile» (la ciudad más cercana está en Argentina), punto
+  en el mar → nada, foto sin datos → solo la fecha del archivo. 40 000
+  búsquedas de ciudad en 0,15 s en el Mac.
+- **Pendiente:** HEIC, lugar y fecha en el iPad.

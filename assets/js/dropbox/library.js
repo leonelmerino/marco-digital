@@ -9,7 +9,8 @@
  *   (muestreo de reservorio) para no agotar la memoria del iPad.
  * - Cada REFRESH_MS se piden solo los cambios desde la última vez (cursor).
  * - Las fotos se muestran con la versión reducida que genera Dropbox, nunca
- *   con el archivo original.
+ *   con el archivo original. Junto con cada una se piden su fecha y su
+ *   ubicación (get_metadata), una sola vez por foto.
  */
 (function (global) {
   'use strict';
@@ -173,6 +174,33 @@
     cursor = null;
   }
 
+  // Fecha y lugar de la foto (files/get_metadata con include_media_info; la
+  // lista de la carpeta ya no los trae). Se guardan en photo.info; si Dropbox
+  // aún los está preparando (`pending`), se vuelven a pedir la próxima vez.
+  // Un fallo aquí nunca impide mostrar la foto.
+  function fetchInfo(photo) {
+    if (photo.info && !photo.info.pending) return Promise.resolve();
+    return Frame.dropboxApi.rpc('files/get_metadata', {
+      path: photo.path,
+      include_media_info: true
+    }).then(function (meta) {
+      var media = meta.media_info;
+      var data = media && media['.tag'] === 'metadata' ? media.metadata : null;
+      var loc = data && data.location;
+      var size = data && data.dimensions;
+      photo.info = {
+        taken: (data && data.time_taken) || meta.client_modified || null,
+        lat: loc ? loc.latitude : null,
+        lon: loc ? loc.longitude : null,
+        width: size ? size.width : 0,
+        height: size ? size.height : 0,
+        pending: !!media && media['.tag'] === 'pending'
+      };
+    }, function (err) {
+      log('datos de ' + photo.name + ': ' + (err.summary || err.message), true);
+    });
+  }
+
   // Cargador para la presentación: devuelve una URL blob: de la miniatura.
   function load(photo, callback) {
     var done = false;
@@ -181,7 +209,11 @@
       done = true;
       callback(new Error('tiempo agotado'));
     }, THUMB_TIMEOUT_MS);
-    Frame.dropboxApi.thumbnail(photo.path).then(function (blob) {
+    Promise.all([
+      Frame.dropboxApi.thumbnail(photo.path),
+      fetchInfo(photo)
+    ]).then(function (results) {
+      var blob = results[0];
       if (done) return;
       done = true;
       clearTimeout(timer);

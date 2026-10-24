@@ -14,7 +14,10 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `storage.js` | `Frame.storage` | `localStorage` con `try/catch` y respaldo en memoria. |
 | `settings.js` | `Frame.settings` | Valores por defecto, validación contra listas cerradas, formulario. |
 | `clock.js` | `Frame.clock` | Hora y fecha locales. |
-| `slideshow.js` | `Frame.slideshow` | Orden, temporizador, carga, fundido y precarga. |
+| `slideshow.js` | `Frame.slideshow` | Orden, temporizador, carga, fundido, precarga y leyenda de cada capa. |
+| `geo.js` | `Frame.geo` | Ciudad y país a partir de coordenadas, sin conexión. Carga `data/cities.js` tras el arranque. |
+| `photo-info.js` | `Frame.photoInfo` | Texto de la leyenda: lugar y «12 de marzo de 2016 · hace 8 años». |
+| `data/cities.js` | `Frame.cityData` | Tabla generada (GeoNames + Natural Earth, ~1,4 MB; ~650 KB comprimida). No se edita a mano. |
 | `sample-photos.js` | `Frame.samplePhotos` | Fotos de prueba, cuando no hay Dropbox conectado. |
 | `radio/stations.js` | `Frame.radioStations` | Estaciones predefinidas y sus URLs. Se carga antes de `settings.js`. |
 | `radio/radio-player.js` | `Frame.radio` | Dos `<audio>`: conectar, reintentar, URLs de respaldo, escaneo sin silencios, estados. |
@@ -22,7 +25,7 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `dropbox/config.js` | `Frame.dropboxConfig` | App key pública. |
 | `dropbox/auth.js` | `Frame.dropboxAuth` | OAuth 2.0 + PKCE, renovación del token, carpeta elegida. |
 | `dropbox/api.js` | `Frame.dropboxApi` | Llamadas a la API (JSON) y miniaturas (Blob), con renovación y espera. |
-| `dropbox/library.js` | `Frame.dropboxLibrary` | Lista por páginas, muestreo, cambios cada 30 min, cargador de miniaturas, explorador. |
+| `dropbox/library.js` | `Frame.dropboxLibrary` | Lista por páginas, muestreo, cambios cada 30 min, cargador de miniaturas con fecha y ubicación, explorador. |
 | `app.js` | — | Arranque, controles, configuración, radio, conectividad, ciclo de vida. |
 
 Ver [dropbox.md](dropbox.md) para el flujo de Dropbox y las carpetas grandes.
@@ -58,6 +61,11 @@ volver, se calcula cuánto tiempo pasó y se cambia de foto si ya tocaba.
 
 **Preferencias.** Se validan contra listas cerradas al leerlas, de modo que un
 valor dañado o antiguo vuelve al valor por defecto en lugar de romper la app.
+
+**Versiones en caché.** `index.html` pide cada archivo con `?v=N`. Al publicar
+cambios hay que subir N en todas las líneas: así el iPad nunca mezcla un
+archivo nuevo con otro guardado en caché (GitHub Pages permite guardarlos 10
+minutos).
 
 **Pantalla completa.** No se usa la Fullscreen API. El escenario usa
 `position: fixed` con `top/right/bottom/left: 0` en vez de `100vh`, que en

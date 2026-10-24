@@ -9,6 +9,9 @@
  * o de { name, path } (Dropbox). Las segundas se piden al cargador
  * (setLoader), que entrega una URL blob: de la miniatura; cada capa revoca su
  * URL blob anterior al cargar otra, así nunca hay más de dos vivas.
+ *
+ * Cada capa tiene su leyenda (lugar y fecha), que aparece y se desvanece con
+ * ella. El texto lo da setCaption(fn), con fn(photo) → lista de líneas.
  */
 (function (global) {
   'use strict';
@@ -34,6 +37,7 @@
   var emptyEl;
   var onShow = null;
   var loader = null;       // function (photo, callback(err, blobUrl))
+  var captionFn = null;    // function (photo) → ['línea', …]
 
   function backLayer() { return layers[1 - front]; }
 
@@ -152,11 +156,26 @@
     });
   }
 
+  function renderCaption(el, photo) {
+    var lines = captionFn && photo ? captionFn(photo) : [];
+    var box = el._caption;
+    while (box.firstChild) box.removeChild(box.firstChild);
+    for (var i = 0; i < lines.length; i++) {
+      var line = document.createElement('div');
+      line.textContent = lines[i];
+      box.appendChild(line);
+    }
+  }
+
   function reveal(photo) {
     var oldFront = layers[front];
     var newFront = backLayer();
+    newFront._photo = photo;
+    renderCaption(newFront, photo);
     newFront.className = 'layer visible';
+    newFront._caption.className = 'caption visible';
     oldFront.className = 'layer';
+    oldFront._caption.className = 'caption';
     front = 1 - front;
     failures = 0;
     showing = false;
@@ -311,6 +330,8 @@
   Frame.slideshow = {
     init: function (settings, showCallback) {
       layers = [document.getElementById('layer-a'), document.getElementById('layer-b')];
+      layers[0]._caption = document.getElementById('caption-a');
+      layers[1]._caption = document.getElementById('caption-b');
       emptyEl = document.getElementById('empty');
       onShow = showCallback || null;
       configure(settings);
@@ -319,6 +340,12 @@
     setPhotos: setPhotos,
     update: update,
     setLoader: function (fn) { loader = fn; },
+    setCaption: function (fn) { captionFn = fn; },
+    // Rehace la leyenda visible (por ejemplo, al cargar la tabla de ciudades).
+    refreshCaption: function () {
+      var el = layers[front];
+      if (el && el._photo) renderCaption(el, el._photo);
+    },
     next: function () { if (photos.length) showAt(pos + 1); },
     prev: function () { if (photos.length) showAt(Math.max(0, pos - 1)); },
     play: function () { playing = true; resume(); },

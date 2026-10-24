@@ -14,6 +14,7 @@
     order: 'random',
     transition: 'fade',
     fit: 'contain',
+    photoInfo: true,
     clockVisible: true,
     clockFormat: '24',
     clockSize: 'm',

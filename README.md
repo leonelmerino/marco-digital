@@ -12,7 +12,8 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | --- | --- | --- |
 | 1 | Reloj, fotos de prueba, fundido, controles, configuración | Validada en el iPad (falta la prueba de varias horas) |
 | 2 | Publicación en GitHub Pages | Publicada; pendiente de validar en el iPad |
-| 3 | Fotos desde una carpeta de Dropbox (OAuth 2.0 + PKCE), también carpetas muy grandes | Implementada; pendiente de probar con la cuenta real y en el iPad |
+| 3 | Fotos desde una carpeta de Dropbox (OAuth 2.0 + PKCE), también carpetas muy grandes | Conexión y carpeta de 41 000 fotos probadas en el iPad |
+| 3b | Lugar y fecha sobre cada foto (ciudad y país sin conexión) | Implementada; pendiente de probar en el iPad |
 | 4 | Radio por internet: 14 estaciones chilenas predefinidas y función Escanear (sustituye a Internet Archive) | Implementada; validada en parte en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
@@ -32,14 +33,15 @@ Una fase solo se da por terminada después de probarla en el iPad real
    teléfono (QR)**: escaneas el código con el iPhone, inicias sesión allí y
    escribes en el iPad el código que muestra Dropbox. Luego eliges la carpeta.
 5. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
-   el ajuste de la foto, el reloj, la fecha y el modo nocturno.
+   el ajuste de la foto, el lugar y la fecha de cada foto, el reloj, la
+   fecha y el modo nocturno.
 5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
    Bloqueo automático › Nunca**. Para que nadie salga de Safari, puedes usar
    **Acceso Guiado** (Ajustes › Accesibilidad).
 
 Opcional: en Safari, **Compartir › Añadir a pantalla de inicio** abre el marco
-sin barras de Safari. Este modo tiene su propio almacenamiento y, en la fase 3,
-puede comportarse distinto con el inicio de sesión de Dropbox; hay que probarlo.
+sin barras de Safari. Este modo tiene su propio almacenamiento: hay que
+conectar Dropbox (con el QR) y elegir la carpeta otra vez dentro de él.
 
 ### Parámetros de prueba
 
@@ -80,6 +82,7 @@ Reglas del código, por compatibilidad con Safari 12:
 - [docs/compatibility.md](docs/compatibility.md): Safari de iOS 12, comprobado y pendiente.
 - [docs/security.md](docs/security.md): datos, credenciales y almacenamiento.
 - [docs/radio.md](docs/radio.md): estaciones, verificación de señales y limitaciones de iOS.
+- [docs/dropbox.md](docs/dropbox.md): Dropbox, carpetas grandes, lugar y fecha de cada foto.
 - [tests/manual-test-plan.md](tests/manual-test-plan.md): pruebas en el iPad.
 
 ## Privacidad
@@ -87,6 +90,16 @@ Reglas del código, por compatibilidad con Safari 12:
 El repositorio es público. No contiene fotografías personales, credenciales ni
 tokens. Las fotos de `assets/photos/` son imágenes generadas para pruebas.
 La radio conecta el iPad directamente con el distribuidor de cada emisora.
+La ciudad de cada foto se calcula en el iPad con una tabla incluida: las
+coordenadas no se envían a ningún servicio.
+
+## Datos de terceros
+
+`assets/js/data/cities.js` se genera con `tools/build-cities.js` a partir de
+[GeoNames](https://www.geonames.org/) (ciudades de más de 15 000 habitantes y
+sus nombres en español, licencia [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/))
+y de [Natural Earth](https://www.naturalearthdata.com/) (fronteras, dominio
+público). `assets/js/vendor/qrcode.js` es qrcode-generator (MIT).
 
 ## Licencia
 

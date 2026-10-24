@@ -62,6 +62,9 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 42 | Dropbox: recarga | Recargar la página | Sigue conectado y vuelve a listar la carpeta sin pedir nada | |
 | 43 | Dropbox: desconectar | Desconectar | Vuelven las fotos de prueba; en dropbox.com ya no aparece como aplicación conectada | |
 | 44 | Dropbox: pantalla de inicio | Abrir desde el icono de la pantalla de inicio | Anotar si pide conectar de nuevo y si el inicio de sesión vuelve al marco | |
+| 45 | Lugar y fecha | Con Dropbox conectado, mirar varias fotos | Abajo a la izquierda, en pequeño: ciudad y país (si la foto tiene GPS) y la fecha con «hace N años»; aparece y se va con la foto | |
+| 46 | Lugar y fecha: ocultar | Configuración › Mostrar lugar y fecha: desactivar | Desaparece; al activarlo vuelve | |
+| 47 | Lugar y fecha con controles | Tocar la pantalla | La leyenda se oculta mientras están los controles | |
 | 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 
 ## Cómo registrar un fallo

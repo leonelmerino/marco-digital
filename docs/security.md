@@ -19,6 +19,12 @@
 - El repositorio es público y no contiene fotos personales, credenciales ni
   tokens. Las fotos de `assets/photos/` son generadas.
 
+## Ubicación de las fotos
+
+Las coordenadas GPS de cada foto llegan de Dropbox y se convierten en ciudad y
+país dentro del iPad, con la tabla `assets/js/data/cities.js`. No se envían a
+ningún servicio de mapas ni se guardan.
+
 ## Dropbox
 
 - OAuth 2.0 con PKCE (S256), sin secreto de aplicación. La App key en
