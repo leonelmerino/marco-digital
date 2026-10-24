@@ -13,7 +13,7 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | 1 | Reloj, fotos de prueba, fundido, controles, configuración | Validada en el iPad (falta la prueba de varias horas) |
 | 2 | Publicación en GitHub Pages | Publicada; pendiente de validar en el iPad |
 | 3 | Fotos desde una carpeta privada de Dropbox (OAuth 2.0 + PKCE) | Sin empezar |
-| 4 | Radio por internet: 13 estaciones chilenas predefinidas (sustituye a Internet Archive) | Implementada; pendiente de validar en el iPad |
+| 4 | Radio por internet: 14 estaciones chilenas predefinidas y función Escanear (sustituye a Internet Archive) | Implementada; validada en parte en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
 Una fase solo se da por terminada después de probarla en el iPad real
@@ -24,8 +24,9 @@ Una fase solo se da por terminada después de probarla en el iPad real
 1. Abre la URL en Safari.
 2. Toca la pantalla para mostrar u ocultar los controles (anterior, pausa,
    siguiente, configuración). Se ocultan solos a los 5 segundos.
-3. En **♪ Radio** eliges una estación; suena al tocarla. El volumen se
-   ajusta con los botones del iPad.
+3. En **♪ Radio** eliges una estación; suena al tocarla. **Escanear** pasa
+   por todas, 5 segundos cada una; toca cualquier cosa para quedarte en la
+   que suena. El volumen se ajusta con los botones del iPad.
 4. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, el reloj, la fecha y el modo nocturno.
 5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›

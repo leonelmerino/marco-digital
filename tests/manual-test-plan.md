@@ -45,11 +45,14 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 24 | Uso prolongado | Dejarla abierta 4 h o más con intervalo de 10 s | Sigue cambiando fotos y la hora es correcta; el diagnóstico muestra «Sigue activa: N min» cada 15 min | |
 | 25 | Radio: abrir | Tocar la pantalla › ♪ Radio | Lista de 13 estaciones; dice «Apagada»; no suena nada | |
 | 26 | Radio: escuchar | Tocar una estación | Suena en pocos segundos; dice «Sonando» | |
-| 27 | Radio: todas | Tocar cada estación una por una | Las 13 suenan (anotar las que no) | |
+| 27 | Radio: todas | Tocar cada estación una por una | Las 14 suenan (anotar las que no) | |
 | 28 | Radio: detener | Tocar ■ | Se detiene; desaparece el aviso de la radio en los controles | |
 | 29 | Radio: volumen | Botones de volumen del iPad | Cambia el volumen; la app no muestra control de volumen | |
 | 30 | Radio y bloqueo | Con la radio sonando, bloquear 1 min y desbloquear | Anotar si siguió sonando o pide «Toca ▶» | |
 | 31 | Radio sin conexión | Con la radio sonando, activar modo avión 20 s | Pasa a «Reconectando…» y luego a error; al quitar el modo avión, tocar ▶ vuelve a sonar | |
+| 33 | Escanear | ♪ Radio › Escanear | Cambia de estación cada ~5 s de sonido, sin tocar nada; tras Beethoven vuelve a Corazón | |
+| 34 | Escanear y quedarse | Durante el escaneo, tocar la foto | Se queda en la estación que sonaba; al abrir ♪ Radio está marcada | |
+| 35 | Escanear con Listo | Escanear y tocar Listo | Vuelve a las fotos y sigue escaneando | |
 | 32 | Radio tras recargar | Recargar la página | No suena sola; recuerda la última estación elegida | |
 
 ## Cómo registrar un fallo
@@ -60,5 +63,5 @@ de la pantalla sirve).
 
 ## Criterio de salida de la fase 1
 
-Casos 1–22, 24 y 25–32 correctos en el iPad, sin errores en el diagnóstico. El caso 23
+Casos 1–22, 24 y 25–35 correctos en el iPad, sin errores en el diagnóstico. El caso 23
 es informativo para la fase 3.

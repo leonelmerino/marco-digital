@@ -34,8 +34,10 @@ con cada prueba en el dispositivo.
 | `visibilitychange` al bloquear y desbloquear | Sí (23-10-2026) | Bloqueo de ~3 min; hora correcta al volver |
 | `crypto.subtle` (necesario para PKCE en la fase 3) | Detectado (23-10-2026) | Falta probar `digest('SHA-256')` |
 | Cambio de orientación | Sí (23-10-2026) | |
-| Radio: las 13 estaciones suenan | Pendiente | |
-| Radio con la pantalla bloqueada | Pendiente | |
+| Radio: estaciones suenan | En parte (23-10-2026) | Corazón, Futuro, Bío-Bío y Concierto; faltan las demás |
+| Radio con la pantalla bloqueada | Sí (23-10-2026) | Siguió sonando |
+| Radio: reconexión tras modo avión | Sí (23-10-2026) | Se cortó a los ~8 s y volvió sola al recuperar la red |
+| Radio: `play()` sin toque al escanear | Pendiente | Necesario para pasar de estación sola |
 | Funcionamiento continuo durante varias horas | Pendiente | |
 
 El panel de diagnóstico (Configuración › Estado y diagnóstico) muestra la

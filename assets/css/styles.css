@@ -184,6 +184,20 @@ body.controls-visible .controls { opacity: 1; pointer-events: auto; }
   -webkit-appearance: none;
 }
 .radio-toggle.on { background: #3a3a3c; }
+.radio-info { -webkit-flex: 1; flex: 1; min-width: 0; }
+.radio-scan {
+  -webkit-flex: none;
+  flex: none;
+  margin-left: 12px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 10px;
+  background: #2c2c2e;
+  color: #f2f2f2;
+  font-size: 17px;
+  -webkit-appearance: none;
+}
+.radio-scan.on { background: #ff9f0a; color: #000; font-weight: 600; }
 .radio-station-name { font-size: 22px; font-weight: 600; }
 .radio-status { font-size: 15px; color: #8e8e93; margin-top: 4px; }
 .radio-status.error { color: #ff6b5b; }

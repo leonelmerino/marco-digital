@@ -40,6 +40,13 @@
     { id: 'futuro', name: 'Futuro', freq: '88.9', genre: 'Rock clásico', urls: triton('FUTURO_SC') },
     { id: 'rockandpop', name: 'Rock & Pop', freq: '94.1', genre: 'Rock y alternativo', urls: triton('ROCK_AND_POP_SC') },
     { id: 'adn', name: 'ADN', freq: '91.7', genre: 'Noticias y deportes', urls: triton('ADN_SC') },
-    { id: 'agricultura', name: 'Agricultura', freq: '92.1', genre: 'Noticias y deportes', urls: dps('agricultura', 'unlimited4-us') }
+    { id: 'agricultura', name: 'Agricultura', freq: '92.1', genre: 'Noticias y deportes', urls: dps('agricultura', 'unlimited4-us') },
+    // Su reproductor oficial usa el redirector AAC de DPS, que hoy responde 404 por
+    // HTTPS; se usan directamente los servidores DPS que sí la entregan.
+    { id: 'beethoven', name: 'Beethoven', freq: '96.5', genre: 'Música clásica', urls: [
+      'https://unlimited4-us.dps.live/beethovenfm/aac/icecast.audio',
+      'https://unlimited5-us.dps.live/beethovenfm/aac/icecast.audio',
+      'https://unlimited5-us.dps.live/beethovenfm/gotardis/audio/now/livestream1.m3u8'
+    ] }
   ];
 })(window);

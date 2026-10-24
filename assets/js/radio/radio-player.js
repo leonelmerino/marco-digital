@@ -10,6 +10,10 @@
  * - En iOS el volumen de la página no se puede cambiar (`audio.volume` se
  *   ignora); se usan los botones del iPad.
  *
+ * - Escanear: recorre las estaciones en bucle; cada una suena SCAN_LISTEN_MS
+ *   desde que empieza el sonido (no desde que se pide) y las que no conectan
+ *   se saltan sin reintentos. Cualquier acción del usuario lo detiene.
+ *
  * Estados: off, connecting, playing, blocked (falta un toque), error.
  */
 (function (global) {
@@ -19,6 +23,8 @@
 
   var CONNECT_TIMEOUT_MS = 15000; // sin sonido tras este tiempo: probar otra vez
   var MAX_RETRIES = 3;
+  var SCAN_LISTEN_MS = 5000;      // tiempo que suena cada estación al escanear
+  var SCAN_CONNECT_MS = 8000;     // al escanear, saltar la que tarda más que esto
 
   var audio = null;
   var stations = [];
@@ -30,7 +36,9 @@
   var failedAttempt = -1;
   var retryTimer = null;
   var watchdog = null;
-  var state = { status: 'off', message: '', station: null };
+  var scanning = false;
+  var scanTimer = null;
+  var state = { status: 'off', message: '', station: null, scanning: false };
   var listeners = [];
 
   function find(id) {
@@ -39,7 +47,7 @@
   }
 
   function setState(status, message) {
-    state = { status: status, message: message || '', station: station };
+    state = { status: status, message: message || '', station: station, scanning: scanning };
     for (var i = 0; i < listeners.length; i++) listeners[i](state);
   }
 
@@ -54,7 +62,7 @@
     clearTimeout(watchdog);
     watchdog = setTimeout(function () {
       if (wanted && state.status === 'connecting') failed('sin respuesta');
-    }, CONNECT_TIMEOUT_MS);
+    }, scanning ? SCAN_CONNECT_MS : CONNECT_TIMEOUT_MS);
   }
 
   // Debe llamarse de forma síncrona dentro del toque para que iOS lo permita.
@@ -62,7 +70,7 @@
     if (!wanted || !station) return;
     var url = station.urls[urlIndex];
     var my = ++attemptId;
-    setState('connecting', retries ? 'Reconectando…' : 'Conectando…');
+    setState('connecting', scanning ? 'Escaneando…' : retries ? 'Reconectando…' : 'Conectando…');
     armWatchdog();
     audio.src = url;
     var promise = audio.play();
@@ -71,6 +79,7 @@
         if (!wanted || my !== attemptId) return;
         if (err && err.name === 'NotAllowedError') {
           clearTimers();
+          endScan();
           setState('blocked', 'Toca ▶ para escuchar');
         } else if (err && err.name !== 'AbortError') {
           failed(err.name || 'error');
@@ -88,6 +97,10 @@
     if (urlIndex + 1 < station.urls.length) {
       urlIndex++;
       attempt();
+      return;
+    }
+    if (scanning) {
+      scanNext(); // al escanear no se insiste: se pasa a la siguiente
       return;
     }
     if (retries < MAX_RETRIES) {
@@ -112,7 +125,11 @@
       if (!wanted) return;
       clearTimers();
       retries = 0;
-      setState('playing', 'Sonando');
+      if (scanning) {
+        clearTimeout(scanTimer);
+        scanTimer = setTimeout(scanNext, SCAN_LISTEN_MS);
+      }
+      setState('playing', scanning ? 'Escaneando…' : 'Sonando');
       Frame.compat.log('Radio ' + station.name + ': sonando (URL ' + (urlIndex + 1) + ')');
     });
     audio.addEventListener('waiting', function () {
@@ -131,14 +148,59 @@
     // iOS puede pausar el audio (llamada, otra app con sonido).
     audio.addEventListener('pause', function () {
       if (wanted && state.status === 'playing') {
+        endScan();
         setState('blocked', 'En pausa · toca ▶ para seguir');
       }
     });
   }
 
+  // ---- Escaneo ----
+
+  function endScan() {
+    scanning = false;
+    clearTimeout(scanTimer);
+    scanTimer = null;
+  }
+
+  function scanNext() {
+    if (!scanning) return;
+    clearTimers();
+    clearTimeout(scanTimer);
+    var index = stations.indexOf(station);
+    station = stations[(index + 1) % stations.length];
+    urlIndex = 0;
+    retries = 0;
+    attempt();
+  }
+
+  // Debe llamarse dentro de un toque, como play().
+  function startScan() {
+    if (!stations.length) return;
+    var wasPlaying = wanted && state.status === 'playing';
+    clearTimers();
+    scanning = true;
+    wanted = true;
+    if (wasPlaying) {
+      scanNext();
+    } else {
+      urlIndex = 0;
+      retries = 0;
+      attempt(); // empezar por la estación actual
+    }
+  }
+
+  // Detener el escaneo y quedarse en la estación que está sonando.
+  function stopScan() {
+    if (!scanning) return;
+    endScan();
+    if (state.status === 'playing') setState('playing', 'Sonando');
+    else setState(state.status, state.status === 'connecting' ? 'Conectando…' : state.message);
+  }
+
   // ---- API pública ----
 
   function play(id) {
+    endScan();
     clearTimers();
     station = find(id || (station && station.id));
     if (!station) return;
@@ -149,6 +211,7 @@
   }
 
   function stop() {
+    endScan();
     wanted = false;
     clearTimers();
     release();
@@ -175,6 +238,9 @@
     },
     play: play,
     stop: stop,
+    startScan: startScan,
+    stopScan: stopScan,
+    isScanning: function () { return scanning; },
     toggle: function () { if (wanted && state.status !== 'blocked' && state.status !== 'error') stop(); else play(); },
     resume: resume,
     isOn: function () { return wanted; },

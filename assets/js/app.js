@@ -102,20 +102,32 @@
     toggle.className = on ? 'radio-toggle on' : 'radio-toggle';
     toggle.setAttribute('aria-label', on ? 'Detener' : 'Escuchar');
 
+    // Con la radio encendida se marca la que suena (también al escanear).
+    var highlighted = state.status !== 'off' && station ? station.id : selected;
     var buttons = $('radio-stations').getElementsByTagName('button');
     for (var i = 0; i < buttons.length; i++) {
-      buttons[i].className = buttons[i].getAttribute('data-id') === selected ? 'station active' : 'station';
+      buttons[i].className = buttons[i].getAttribute('data-id') === highlighted ? 'station active' : 'station';
     }
+
+    var scan = $('btn-scan');
+    scan.innerHTML = state.scanning ? 'Quedarme aquí' : '&#8635; Escanear';
+    scan.className = state.scanning ? 'radio-scan on' : 'radio-scan';
 
     var now = $('radio-now');
     if (state.status === 'off') {
       now.className = 'radio-now hidden';
     } else {
-      now.textContent = '♪ ' + label + ' · ' + state.message;
+      now.textContent = '♪ ' + (state.scanning ? 'Escaneando · ' + label : label + ' · ' + state.message);
       now.className = isError ? 'radio-now error' : 'radio-now';
     }
     // Avisar aunque los controles estén ocultos.
     if (isError || state.status === 'blocked') showControls();
+  }
+
+  function stopScanHere() {
+    Frame.radio.stopScan();
+    var station = Frame.radio.getState().station;
+    if (station) Frame.settings.set('radioStation', station.id);
   }
 
   function openRadio() {
@@ -146,6 +158,22 @@
       if (!Frame.radio.isOn()) Frame.radio.play(Frame.settings.get().radioStation);
       else Frame.radio.toggle();
     });
+    $('btn-scan').addEventListener('click', function () {
+      if (Frame.radio.isScanning()) stopScanHere();
+      else Frame.radio.startScan();
+    });
+
+    // Durante el escaneo, cualquier toque lo detiene y deja sonando la estación
+    // actual. Se escucha en fase de captura, antes que el botón tocado. Cerrar
+    // la ventana de radio no cuenta, para poder volver a las fotos escaneando.
+    document.addEventListener('click', function (event) {
+      if (!Frame.radio.isScanning()) return;
+      var target = event.target;
+      if (target === $('radio-sheet')) return;
+      if (target.closest && target.closest('#btn-scan, #btn-radio-close')) return;
+      stopScanHere();
+    }, true);
+
     $('btn-radio-close').addEventListener('click', closeRadio);
     $('radio-sheet').addEventListener('click', function (event) {
       if (event.target === $('radio-sheet')) closeRadio();
