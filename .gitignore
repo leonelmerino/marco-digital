@@ -1,0 +1,6 @@
+.DS_Store
+.claude/
+*.log
+# Nunca subir credenciales ni fotos personales
+.env
+*.local.*

@@ -1,0 +1,239 @@
+/*
+ * Marco digital — estilos.
+ * Objetivo: Safari 12 (iOS 12.5.8). Evitar `gap` en flexbox (Safari 14.1+),
+ * `inset`, `:is()`, `aspect-ratio` y otras propiedades recientes.
+ */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #000;
+  color: #f2f2f2;
+  font-family: -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  overflow: hidden;
+}
+
+button, select, input { font: inherit; }
+
+.hidden { display: none !important; }
+
+/* ---------- Escenario de fotos ---------- */
+
+/* position: fixed con top/bottom en vez de 100vh: en Safari de iOS 100vh
+   incluye la barra de herramientas y deja la parte inferior oculta. */
+.stage {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: #000;
+  cursor: pointer; /* necesario para que iOS 12 dispare `click` en un div */
+  touch-action: manipulation;
+}
+
+.layer {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  opacity: 0;
+  -webkit-transition: opacity 1.2s ease-in-out;
+  transition: opacity 1.2s ease-in-out;
+  /* Sin translateZ: forzar capas permanentes en la GPU gasta memoria en el
+     iPad y, en pruebas, dejaba la imagen en negro en algunas capturas. */
+}
+.layer.visible { opacity: 1; }
+body.fit-cover .layer { object-fit: cover; }
+body.transition-none .layer { -webkit-transition: none; transition: none; }
+
+.dimmer {
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+}
+body.theme-night .dimmer { opacity: 0.45; }
+
+.empty {
+  position: absolute;
+  top: 18%; left: 0; right: 0; /* fuera del centro, donde puede ir el reloj */
+  text-align: center;
+  font-size: 22px;
+  color: #aaa;
+}
+
+/* ---------- Reloj ---------- */
+
+.clock {
+  position: fixed;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 0, 0, 0.5);
+  line-height: 1;
+}
+.clock-time {
+  font-weight: 200;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+  letter-spacing: 0.01em;
+}
+.clock-date { margin-top: 0.35em; font-weight: 400; }
+.clock-ampm { font-size: 0.4em; margin-left: 0.15em; font-weight: 400; }
+
+.size-s .clock-time { font-size: 48px; }
+.size-s .clock-date { font-size: 16px; }
+.size-m .clock-time { font-size: 84px; }
+.size-m .clock-date { font-size: 22px; }
+.size-l .clock-time { font-size: 140px; }
+.size-l .clock-date { font-size: 30px; }
+
+.pos-bottom-right { right: 36px; bottom: 32px; text-align: right; }
+.pos-bottom-left  { left: 36px;  bottom: 32px; text-align: left; }
+.pos-top-right    { right: 36px; top: 32px;    text-align: right; }
+.pos-top-left     { left: 36px;  top: 32px;    text-align: left; }
+.pos-center {
+  left: 0; right: 0; top: 50%;
+  text-align: center;
+  -webkit-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+
+/* ---------- Indicador de estado ---------- */
+
+.status {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 14px;
+  color: #ddd;
+  pointer-events: none;
+}
+
+/* ---------- Controles ---------- */
+
+.controls {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  padding: 18px 0 28px;
+  text-align: center;
+  background: -webkit-linear-gradient(bottom, rgba(0,0,0,0.6), rgba(0,0,0,0));
+  background: linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0));
+  opacity: 0;
+  pointer-events: none;
+  -webkit-transition: opacity 0.3s;
+  transition: opacity 0.3s;
+}
+body.controls-visible .controls { opacity: 1; pointer-events: auto; }
+
+.ctl {
+  display: inline-block;
+  vertical-align: middle;
+  min-width: 64px;
+  height: 56px;
+  margin: 0 6px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  font-size: 30px;
+  line-height: 56px;
+  -webkit-appearance: none;
+}
+.ctl-wide { font-size: 18px; padding: 0 24px; }
+.ctl:active { background: rgba(255, 255, 255, 0.35); }
+
+/* ---------- Configuración ---------- */
+
+.settings {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: rgba(0, 0, 0, 0.6);
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  -webkit-user-select: auto;
+  user-select: auto;
+}
+.settings-panel {
+  max-width: 620px;
+  margin: 24px auto 48px;
+  padding: 0 20px 20px;
+  background: #1c1c1e;
+  border-radius: 14px;
+}
+.settings-head {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  padding: 18px 0 8px;
+}
+.settings h1 { font-size: 24px; margin: 0; font-weight: 600; }
+.settings h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8e8e93;
+  margin: 22px 0 6px;
+  font-weight: 600;
+}
+.settings section { border-top: 1px solid #2c2c2e; }
+.settings section.disabled { opacity: 0.55; }
+
+.row {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-justify-content: space-between;
+  justify-content: space-between;
+  min-height: 48px;
+  font-size: 17px;
+}
+.row select { margin-left: 16px; max-width: 60%; font-size: 17px; }
+.row input[type="checkbox"] { width: 24px; height: 24px; margin-left: 16px; }
+
+.note { font-size: 14px; color: #8e8e93; line-height: 1.4; margin: 8px 0; }
+
+.btn-primary, .row-buttons button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 17px;
+  -webkit-appearance: none;
+}
+.btn-primary { background: #0a84ff; color: #fff; font-weight: 600; }
+.row-buttons { padding: 10px 0; }
+.row-buttons button { background: #2c2c2e; color: #f2f2f2; margin: 0 8px 8px 0; }
+
+.diag-summary { font-size: 14px; color: #c7c7cc; line-height: 1.5; padding: 4px 0; }
+
+/* ---------- Panel de diagnóstico ---------- */
+
+.debug {
+  position: fixed;
+  top: 0; left: 0;
+  width: 46%;
+  max-height: 45%;
+  overflow: hidden;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #9f9;
+  font: 11px/1.35 Menlo, Courier, monospace;
+  pointer-events: none;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.debug .err { color: #f88; }

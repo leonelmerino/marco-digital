@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Marco">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#000000">
+  <title>Marco digital</title>
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body class="controls-visible">
+  <!-- Modo marco: dos capas de imagen para el fundido -->
+  <div id="stage" class="stage" aria-label="Presentación de fotografías">
+    <img id="layer-a" class="layer" alt="">
+    <img id="layer-b" class="layer" alt="">
+    <div id="dimmer" class="dimmer"></div>
+    <div id="empty" class="empty hidden">No hay fotografías para mostrar.</div>
+  </div>
+
+  <div id="clock" class="clock pos-bottom-right size-m">
+    <div id="clock-time" class="clock-time">--:--</div>
+    <div id="clock-date" class="clock-date hidden"></div>
+  </div>
+
+  <div id="status" class="status hidden" role="status"></div>
+
+  <!-- Controles: aparecen al tocar la pantalla -->
+  <div id="controls" class="controls">
+    <button type="button" id="btn-prev" class="ctl" aria-label="Anterior">&#8249;</button>
+    <button type="button" id="btn-play" class="ctl" aria-label="Pausar">&#10074;&#10074;</button>
+    <button type="button" id="btn-next" class="ctl" aria-label="Siguiente">&#8250;</button>
+    <button type="button" id="btn-settings" class="ctl ctl-wide">Configuración</button>
+  </div>
+
+  <!-- Modo configuración -->
+  <div id="settings" class="settings hidden" role="dialog" aria-labelledby="settings-title">
+    <div class="settings-panel">
+      <div class="settings-head">
+        <h1 id="settings-title">Configuración</h1>
+        <button type="button" id="btn-close" class="btn-primary">Listo</button>
+      </div>
+
+      <form id="settings-form" onsubmit="return false">
+        <section>
+          <h2>Presentación</h2>
+          <label class="row">Intervalo
+            <select name="interval">
+              <option value="10">10 segundos</option>
+              <option value="15">15 segundos</option>
+              <option value="30">30 segundos</option>
+              <option value="60">1 minuto</option>
+              <option value="120">2 minutos</option>
+              <option value="300">5 minutos</option>
+              <option value="900">15 minutos</option>
+            </select>
+          </label>
+          <label class="row">Orden
+            <select name="order">
+              <option value="random">Aleatorio</option>
+              <option value="sequential">Cronológico (por nombre)</option>
+            </select>
+          </label>
+          <label class="row">Transición
+            <select name="transition">
+              <option value="fade">Fundido</option>
+              <option value="none">Corte directo</option>
+            </select>
+          </label>
+          <label class="row">Ajuste de la foto
+            <select name="fit">
+              <option value="contain">Foto completa (con bordes)</option>
+              <option value="cover">Llenar la pantalla (recorta)</option>
+            </select>
+          </label>
+        </section>
+
+        <section>
+          <h2>Reloj</h2>
+          <label class="row">Mostrar reloj <input type="checkbox" name="clockVisible"></label>
+          <label class="row">Formato
+            <select name="clockFormat">
+              <option value="24">24 horas</option>
+              <option value="12">12 horas</option>
+            </select>
+          </label>
+          <label class="row">Tamaño
+            <select name="clockSize">
+              <option value="s">Pequeño</option>
+              <option value="m">Mediano</option>
+              <option value="l">Grande</option>
+            </select>
+          </label>
+          <label class="row">Posición
+            <select name="clockPosition">
+              <option value="bottom-right">Abajo a la derecha</option>
+              <option value="bottom-left">Abajo a la izquierda</option>
+              <option value="top-right">Arriba a la derecha</option>
+              <option value="top-left">Arriba a la izquierda</option>
+              <option value="center">Centro</option>
+            </select>
+          </label>
+          <label class="row">Mostrar fecha <input type="checkbox" name="dateVisible"></label>
+        </section>
+
+        <section>
+          <h2>Pantalla</h2>
+          <label class="row">Modo visual
+            <select name="theme">
+              <option value="normal">Normal</option>
+              <option value="night">Nocturno (atenuado)</option>
+            </select>
+          </label>
+          <p class="note">La orientación la decide el iPad. Para mantener la pantalla encendida:
+            Ajustes &rsaquo; Pantalla y brillo &rsaquo; Bloqueo automático &rsaquo; Nunca.</p>
+        </section>
+
+        <section class="disabled">
+          <h2>Dropbox</h2>
+          <p class="note">Disponible en la fase 3. Ahora se muestran fotografías de prueba.</p>
+        </section>
+
+        <section class="disabled">
+          <h2>Música</h2>
+          <p class="note">Disponible en la fase 4.</p>
+        </section>
+
+        <section>
+          <h2>Estado y diagnóstico</h2>
+          <div id="diag-summary" class="diag-summary"></div>
+          <label class="row">Panel de diagnóstico <input type="checkbox" name="debug"></label>
+          <div class="row-buttons">
+            <button type="button" id="btn-reload">Recargar página</button>
+            <button type="button" id="btn-reset">Restablecer valores</button>
+          </div>
+        </section>
+      </form>
+    </div>
+  </div>
+
+  <div id="debug" class="debug hidden" aria-live="polite"></div>
+
+  <!-- Scripts clásicos (sin módulos ni compilación) para Safari de iOS 12 -->
+  <script src="assets/js/compatibility.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/settings.js"></script>
+  <script src="assets/js/clock.js"></script>
+  <script src="assets/js/slideshow.js"></script>
+  <script src="assets/js/sample-photos.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

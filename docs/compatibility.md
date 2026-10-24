@@ -1,0 +1,44 @@
+# Compatibilidad con Safari de iOS 12.5.8
+
+iOS 12.5.8 incluye Safari 12.1. Esta tabla distingue lo **comprobado en el
+iPad** de lo que solo se ha supuesto a partir de la documentación. Actualizarla
+con cada prueba en el dispositivo.
+
+## Decisiones tomadas por compatibilidad
+
+| Tema | Decisión |
+| --- | --- |
+| Sintaxis JS | ES2017 en scripts clásicos. Sin `?.`, `??` (Safari 13.1+) ni `Object.fromEntries` (12.1, sin margen). |
+| Módulos ES | No se usan, para evitar diferencias de carga y caché. |
+| Flexbox `gap` | No se usa (Safari 14.1+). Se usan márgenes. |
+| `100vh` | No se usa: incluye la barra de Safari. Se usa `position: fixed` con `top/bottom: 0`. |
+| `click` en un `div` | iOS 12 solo lo dispara si el elemento tiene `cursor: pointer`. El escenario lo tiene. |
+| Zoom con doble toque | `touch-action: manipulation` en el escenario. |
+| Fullscreen API | No se usa: su soporte en el iPad con iOS 12 es limitado y no está comprobado. La app funciona en una pestaña normal. |
+| `translateZ(0)` en las capas | Retirado: gasta memoria de GPU y en pruebas dejaba las capturas en negro. |
+| Service workers | No se usan hasta comprobarlos en el iPad (requisito de la especificación). |
+| Fechas | Nombres de días y meses en español escritos a mano, sin depender de `Intl`. |
+
+## Estado de las pruebas en el iPad
+
+| Capacidad | Comprobado en el iPad | Resultado |
+| --- | --- | --- |
+| Carga de la página y scripts sin errores | Pendiente | |
+| `object-fit` en `<img>` | Pendiente | |
+| Transición de `opacity` | Pendiente | |
+| `localStorage` en pestaña normal | Pendiente | |
+| `localStorage` desde la pantalla de inicio | Pendiente | |
+| `visibilitychange` al bloquear y desbloquear | Pendiente | |
+| `crypto.subtle` (necesario para PKCE en la fase 3) | Pendiente | |
+| Funcionamiento continuo durante varias horas | Pendiente | |
+
+El panel de diagnóstico (Configuración › Estado y diagnóstico) muestra la
+versión de iOS y las capacidades detectadas para rellenar esta tabla.
+
+## Limitaciones conocidas
+
+- La app no puede impedir que el iPad se bloquee: hay que configurar
+  **Bloqueo automático › Nunca**.
+- La orientación no se puede fijar desde una página web; el diseño se adapta.
+- Con la página en segundo plano o la pantalla bloqueada, iOS congela los
+  temporizadores; la app se pone al día al volver.
