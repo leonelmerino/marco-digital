@@ -16,10 +16,12 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `clock.js` | `Frame.clock` | Hora y fecha locales. |
 | `slideshow.js` | `Frame.slideshow` | Orden, temporizador, carga, fundido y precarga. |
 | `sample-photos.js` | `Frame.samplePhotos` | Fuente de fotos de la fase 1 (se sustituirá por Dropbox). |
-| `app.js` | — | Arranque, controles, configuración, conectividad, ciclo de vida. |
+| `radio/stations.js` | `Frame.radioStations` | Estaciones predefinidas y sus URLs. Se carga antes de `settings.js`. |
+| `radio/radio-player.js` | `Frame.radio` | Un único `<audio>`: conectar, reintentar, URLs de respaldo, estados. |
+| `app.js` | — | Arranque, controles, configuración, radio, conectividad, ciclo de vida. |
 
-En las fases 3 y 4 se añadirán `dropbox-auth.js`, `dropbox-photos.js` y
-`music/` según la estructura de la especificación.
+En la fase 3 se añadirán `dropbox-auth.js` y `dropbox-photos.js`.
+La radio sustituye a la carpeta `music/` prevista en la especificación (ver `docs/radio.md`).
 
 ## Decisiones
 

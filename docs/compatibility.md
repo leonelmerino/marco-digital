@@ -18,6 +18,9 @@ con cada prueba en el dispositivo.
 | `translateZ(0)` en las capas | Retirado: gasta memoria de GPU y en pruebas dejaba las capturas en negro. |
 | Service workers | No se usan hasta comprobarlos en el iPad (requisito de la especificación). |
 | Fechas | Nombres de días y meses en español escritos a mano, sin depender de `Intl`. |
+| Audio automático | No se usa: `play()` solo se llama dentro de un toque. |
+| Volumen del audio | iOS ignora `audio.volume`; el control se oculta en iOS. |
+| Audio HTTP | No se usa: Safari lo bloquea en una página HTTPS. Todas las radios usan HTTPS. |
 
 ## Estado de las pruebas en el iPad
 
@@ -31,6 +34,8 @@ con cada prueba en el dispositivo.
 | `visibilitychange` al bloquear y desbloquear | Sí (23-10-2026) | Bloqueo de ~3 min; hora correcta al volver |
 | `crypto.subtle` (necesario para PKCE en la fase 3) | Detectado (23-10-2026) | Falta probar `digest('SHA-256')` |
 | Cambio de orientación | Sí (23-10-2026) | |
+| Radio: las 13 estaciones suenan | Pendiente | |
+| Radio con la pantalla bloqueada | Pendiente | |
 | Funcionamiento continuo durante varias horas | Pendiente | |
 
 El panel de diagnóstico (Configuración › Estado y diagnóstico) muestra la

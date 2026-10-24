@@ -13,7 +13,7 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | 1 | Reloj, fotos de prueba, fundido, controles, configuración | Validada en el iPad (falta la prueba de varias horas) |
 | 2 | Publicación en GitHub Pages | Publicada; pendiente de validar en el iPad |
 | 3 | Fotos desde una carpeta privada de Dropbox (OAuth 2.0 + PKCE) | Sin empezar |
-| 4 | Radio por internet: estaciones predefinidas (sustituye a Internet Archive) | Sin empezar |
+| 4 | Radio por internet: 13 estaciones chilenas predefinidas (sustituye a Internet Archive) | Implementada; pendiente de validar en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
 Una fase solo se da por terminada después de probarla en el iPad real
@@ -24,9 +24,11 @@ Una fase solo se da por terminada después de probarla en el iPad real
 1. Abre la URL en Safari.
 2. Toca la pantalla para mostrar u ocultar los controles (anterior, pausa,
    siguiente, configuración). Se ocultan solos a los 5 segundos.
-3. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
+3. En **♪ Radio** eliges una estación; suena al tocarla. El volumen se
+   ajusta con los botones del iPad.
+4. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, el reloj, la fecha y el modo nocturno.
-4. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
+5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
    Bloqueo automático › Nunca**. Para que nadie salga de Safari, puedes usar
    **Acceso Guiado** (Ajustes › Accesibilidad).
 
@@ -72,12 +74,14 @@ Reglas del código, por compatibilidad con Safari 12:
 - [docs/setup.md](docs/setup.md): repositorio y GitHub Pages.
 - [docs/compatibility.md](docs/compatibility.md): Safari de iOS 12, comprobado y pendiente.
 - [docs/security.md](docs/security.md): datos, credenciales y almacenamiento.
+- [docs/radio.md](docs/radio.md): estaciones, verificación de señales y limitaciones de iOS.
 - [tests/manual-test-plan.md](tests/manual-test-plan.md): pruebas en el iPad.
 
 ## Privacidad
 
 El repositorio es público. No contiene fotografías personales, credenciales ni
 tokens. Las fotos de `assets/photos/` son imágenes generadas para pruebas.
+La radio conecta el iPad directamente con el distribuidor de cada emisora.
 
 ## Licencia
 

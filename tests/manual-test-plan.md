@@ -1,4 +1,4 @@
-# Plan de pruebas manuales — Fase 1 y 2
+# Plan de pruebas manuales — Fases 1, 2 y 4
 
 Dispositivo: **iPad Air A1474, iOS 12.5.8, Safari**. No sustituir por el
 simulador ni por Chrome.
@@ -42,6 +42,14 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 21 | Rotación | Girar a vertical y volver a horizontal | Se adapta; reloj y controles bien colocados | |
 | 22 | Sin conexión | Activar modo avión | Aparece «Sin conexión»; reloj y fotos ya cargadas siguen | |
 | 23 | Pantalla de inicio | Compartir › Añadir a pantalla de inicio; abrir desde el icono | Sin barras de Safari; anotar si conserva las preferencias de la pestaña | |
+| 25 | Radio: abrir | Tocar la pantalla › ♪ Radio | Lista de 13 estaciones; dice «Apagada»; no suena nada | |
+| 26 | Radio: escuchar | Tocar una estación | Suena en pocos segundos; dice «Sonando» | |
+| 27 | Radio: todas | Tocar cada estación una por una | Las 13 suenan (anotar las que no) | |
+| 28 | Radio: detener | Tocar ■ | Se detiene; desaparece el aviso de la radio en los controles | |
+| 29 | Radio: volumen | Botones de volumen del iPad | Cambia el volumen; la app no muestra control de volumen | |
+| 30 | Radio y bloqueo | Con la radio sonando, bloquear 1 min y desbloquear | Anotar si siguió sonando o pide «Toca ▶» | |
+| 31 | Radio sin conexión | Con la radio sonando, activar modo avión 20 s | Pasa a «Reconectando…» y luego a error; al quitar el modo avión, tocar ▶ vuelve a sonar | |
+| 32 | Radio tras recargar | Recargar la página | No suena sola; recuerda la última estación elegida | |
 | 24 | Uso prolongado | Dejarla abierta 4 h o más con intervalo de 10 s | Sigue cambiando fotos y la hora es correcta; el diagnóstico muestra «Sigue activa: N min» cada 15 min | |
 
 ## Cómo registrar un fallo

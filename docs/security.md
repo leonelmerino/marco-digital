@@ -2,7 +2,9 @@
 
 ## Fase 1 (estado actual)
 
-- La app no se comunica con ningún servicio externo.
+- Las fotos de prueba no salen del sitio. La única conexión externa es la
+  radio, que el iPad abre directamente con el distribuidor de cada emisora
+  (Triton, DPS, Mediastream) al tocar una estación. No se envían datos de la app.
 - `localStorage` guarda solo preferencias de presentación bajo la clave
   `marco-digital:settings.v1`. Nada sensible.
 - Si `localStorage` no está disponible o se borra, la app usa valores por
@@ -10,7 +12,7 @@
 - El repositorio es público y no contiene fotos personales, credenciales ni
   tokens. Las fotos de `assets/photos/` son generadas.
 
-## Principios para las fases 3 y 4
+## Principios para la fase 3
 
 - Dropbox con OAuth 2.0 + PKCE, sin secreto de cliente en el JavaScript.
 - Permisos mínimos: lectura de archivos y metadatos.

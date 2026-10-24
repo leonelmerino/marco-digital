@@ -20,8 +20,13 @@
     clockPosition: 'bottom-right',
     dateVisible: false,
     theme: 'normal',
+    radioStation: Frame.radioStations.length ? Frame.radioStations[0].id : '',
+    radioVolume: 80,
     debug: false
   };
+
+  var stationIds = [];
+  for (var s = 0; s < Frame.radioStations.length; s++) stationIds.push(Frame.radioStations[s].id);
 
   var ALLOWED = {
     interval: [10, 15, 30, 60, 120, 300, 900],
@@ -31,7 +36,9 @@
     clockFormat: ['24', '12'],
     clockSize: ['s', 'm', 'l'],
     clockPosition: ['bottom-right', 'bottom-left', 'top-right', 'top-left', 'center'],
-    theme: ['normal', 'night']
+    theme: ['normal', 'night'],
+    radioStation: stationIds,
+    radioVolume: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
   };
 
   var current = {};

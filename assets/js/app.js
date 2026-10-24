@@ -65,6 +65,102 @@
       showControls();
     });
     $('btn-settings').addEventListener('click', openSettings);
+    $('btn-radio').addEventListener('click', openRadio);
+  }
+
+  // ---- Radio ----
+
+  function escapeHtml(text) {
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderStations() {
+    var html = '';
+    var list = Frame.radioStations;
+    for (var i = 0; i < list.length; i++) {
+      html += '<button type="button" class="station" data-id="' + list[i].id + '">' +
+        '<span class="station-name">' + escapeHtml(list[i].name) + '</span>' +
+        '<span class="station-meta">' + escapeHtml(list[i].freq + ' · ' + list[i].genre) + '</span>' +
+        '</button>';
+    }
+    $('radio-stations').innerHTML = html;
+  }
+
+  function updateRadioUI(state) {
+    var selected = Frame.settings.get().radioStation;
+    var station = state.station;
+    var label = station ? station.name + ' ' + station.freq : '';
+    var isError = state.status === 'error';
+
+    $('radio-station-name').textContent = label;
+    $('radio-status').textContent = state.status === 'off' ? 'Apagada' : state.message;
+    $('radio-status').className = isError ? 'radio-status error' : 'radio-status';
+
+    var on = Frame.radio.isOn() && state.status !== 'blocked' && !isError;
+    var toggle = $('btn-radio-toggle');
+    toggle.innerHTML = on ? '&#9632;' : '&#9654;';
+    toggle.className = on ? 'radio-toggle on' : 'radio-toggle';
+    toggle.setAttribute('aria-label', on ? 'Detener' : 'Escuchar');
+
+    var buttons = $('radio-stations').getElementsByTagName('button');
+    for (var i = 0; i < buttons.length; i++) {
+      buttons[i].className = buttons[i].getAttribute('data-id') === selected ? 'station active' : 'station';
+    }
+
+    var now = $('radio-now');
+    if (state.status === 'off') {
+      now.className = 'radio-now hidden';
+    } else {
+      now.textContent = '♪ ' + label + ' · ' + state.message;
+      now.className = isError ? 'radio-now error' : 'radio-now';
+    }
+    // Avisar aunque los controles estén ocultos.
+    if (isError || state.status === 'blocked') showControls();
+  }
+
+  function openRadio() {
+    hideControls();
+    $('radio-sheet').className = 'settings';
+  }
+
+  function closeRadio() {
+    $('radio-sheet').className = 'settings hidden';
+  }
+
+  function bindRadio(settings) {
+    renderStations();
+    Frame.radio.init(Frame.radioStations, settings.radioStation);
+    Frame.radio.setVolume(settings.radioVolume);
+    Frame.radio.onChange(updateRadioUI);
+    updateRadioUI(Frame.radio.getState());
+
+    // play() tiene que ocurrir dentro del toque para que iOS permita el sonido.
+    $('radio-stations').addEventListener('click', function (event) {
+      var button = event.target.closest ? event.target.closest('.station') : null;
+      if (!button) return;
+      var id = button.getAttribute('data-id');
+      Frame.settings.set('radioStation', id);
+      Frame.radio.play(id);
+    });
+    $('btn-radio-toggle').addEventListener('click', function () {
+      if (!Frame.radio.isOn()) Frame.radio.play(Frame.settings.get().radioStation);
+      else Frame.radio.toggle();
+    });
+    $('btn-radio-close').addEventListener('click', closeRadio);
+    $('radio-sheet').addEventListener('click', function (event) {
+      if (event.target === $('radio-sheet')) closeRadio();
+    });
+
+    // En iOS la página no puede cambiar el volumen: se oculta el control.
+    if (Frame.compat.features.ios) {
+      $('radio-volume-row').className = 'row hidden';
+      $('radio-volume-note').className = 'note';
+    } else {
+      var volume = $('radio-volume');
+      volume.value = String(settings.radioVolume);
+      volume.addEventListener('input', function () { Frame.radio.setVolume(Number(volume.value)); });
+      volume.addEventListener('change', function () { Frame.settings.set('radioVolume', Number(volume.value)); });
+    }
   }
 
   // ---- Configuración ----
@@ -116,6 +212,7 @@
     Frame.compat.log('Página visible de nuevo');
     Frame.clock.refresh();
     Frame.slideshow.resume();
+    Frame.radio.resume();
     updateConnectivity();
   }
 
@@ -161,6 +258,7 @@
 
     bindControls();
     bindSettings();
+    bindRadio(settings);
     bindLifecycle();
     updateConnectivity();
     updatePlayButton();

@@ -30,10 +30,38 @@
 
   <!-- Controles: aparecen al tocar la pantalla -->
   <div id="controls" class="controls">
+    <div id="radio-now" class="radio-now hidden"></div>
     <button type="button" id="btn-prev" class="ctl" aria-label="Anterior">&#8249;</button>
     <button type="button" id="btn-play" class="ctl" aria-label="Pausar">&#10074;&#10074;</button>
     <button type="button" id="btn-next" class="ctl" aria-label="Siguiente">&#8250;</button>
+    <button type="button" id="btn-radio" class="ctl ctl-wide">&#9834; Radio</button>
     <button type="button" id="btn-settings" class="ctl ctl-wide">Configuración</button>
+  </div>
+
+  <audio id="radio-audio" preload="none"></audio>
+
+  <!-- Radio: estaciones predefinidas -->
+  <div id="radio-sheet" class="settings hidden" role="dialog" aria-labelledby="radio-title">
+    <div class="settings-panel">
+      <div class="settings-head">
+        <h1 id="radio-title">Radio</h1>
+        <button type="button" id="btn-radio-close" class="btn-primary">Listo</button>
+      </div>
+      <div class="radio-player">
+        <button type="button" id="btn-radio-toggle" class="radio-toggle" aria-label="Escuchar">&#9654;</button>
+        <div class="radio-info">
+          <div id="radio-station-name" class="radio-station-name"></div>
+          <div id="radio-status" class="radio-status"></div>
+        </div>
+      </div>
+      <div id="radio-volume-row" class="row">Volumen
+        <input type="range" id="radio-volume" min="0" max="100" step="10">
+      </div>
+      <p id="radio-volume-note" class="note hidden">En el iPad, el volumen se ajusta con los botones laterales.</p>
+      <div id="radio-stations" class="radio-stations"></div>
+      <p class="note">Señales oficiales en directo de cada emisora. El marco no graba ni guarda audio.
+        La radio empieza solo cuando tocas una estación o &#9654;.</p>
+    </div>
   </div>
 
   <!-- Modo configuración -->
@@ -123,9 +151,9 @@
           <p class="note">Disponible en la fase 3. Ahora se muestran fotografías de prueba.</p>
         </section>
 
-        <section class="disabled">
-          <h2>Música</h2>
-          <p class="note">Disponible en la fase 4.</p>
+        <section>
+          <h2>Radio</h2>
+          <p class="note">Usa el botón &#9834; Radio de los controles para elegir una estación.</p>
         </section>
 
         <section>
@@ -146,10 +174,12 @@
   <!-- Scripts clásicos (sin módulos ni compilación) para Safari de iOS 12 -->
   <script src="assets/js/compatibility.js"></script>
   <script src="assets/js/storage.js"></script>
+  <script src="assets/js/radio/stations.js"></script>
   <script src="assets/js/settings.js"></script>
   <script src="assets/js/clock.js"></script>
   <script src="assets/js/slideshow.js"></script>
   <script src="assets/js/sample-photos.js"></script>
+  <script src="assets/js/radio/radio-player.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>
