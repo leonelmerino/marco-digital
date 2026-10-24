@@ -15,12 +15,16 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `settings.js` | `Frame.settings` | Valores por defecto, validación contra listas cerradas, formulario. |
 | `clock.js` | `Frame.clock` | Hora y fecha locales. |
 | `slideshow.js` | `Frame.slideshow` | Orden, temporizador, carga, fundido y precarga. |
-| `sample-photos.js` | `Frame.samplePhotos` | Fuente de fotos de la fase 1 (se sustituirá por Dropbox). |
+| `sample-photos.js` | `Frame.samplePhotos` | Fotos de prueba, cuando no hay Dropbox conectado. |
 | `radio/stations.js` | `Frame.radioStations` | Estaciones predefinidas y sus URLs. Se carga antes de `settings.js`. |
-| `radio/radio-player.js` | `Frame.radio` | Un único `<audio>`: conectar, reintentar, URLs de respaldo, estados. |
+| `radio/radio-player.js` | `Frame.radio` | Dos `<audio>`: conectar, reintentar, URLs de respaldo, escaneo sin silencios, estados. |
+| `dropbox/config.js` | `Frame.dropboxConfig` | App key pública. |
+| `dropbox/auth.js` | `Frame.dropboxAuth` | OAuth 2.0 + PKCE, renovación del token, carpeta elegida. |
+| `dropbox/api.js` | `Frame.dropboxApi` | Llamadas a la API (JSON) y miniaturas (Blob), con renovación y espera. |
+| `dropbox/library.js` | `Frame.dropboxLibrary` | Lista por páginas, muestreo, cambios cada 30 min, cargador de miniaturas, explorador. |
 | `app.js` | — | Arranque, controles, configuración, radio, conectividad, ciclo de vida. |
 
-En la fase 3 se añadirán `dropbox-auth.js` y `dropbox-photos.js`.
+Ver [dropbox.md](dropbox.md) para el flujo de Dropbox y las carpetas grandes.
 La radio sustituye a la carpeta `music/` prevista en la especificación (ver `docs/radio.md`).
 
 ## Decisiones

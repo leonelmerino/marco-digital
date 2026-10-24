@@ -29,5 +29,6 @@ gh api -X POST repos/<usuario>/marco-digital/pages -f "source[branch]=main" -f "
 
 ## Fase 3
 
-La URL publicada deberá registrarse como URI de redirección en la app de
-Dropbox. Los pasos se documentarán aquí.
+La aplicación de Dropbox y sus direcciones de retorno se describen en
+[dropbox.md](dropbox.md). Si se publica en otra dirección, hay que añadirla
+como *Redirect URI* en la consola de Dropbox.

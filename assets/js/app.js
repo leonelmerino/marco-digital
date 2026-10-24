@@ -197,6 +197,169 @@
     }
   }
 
+  // ---- Fotos: de prueba o de Dropbox ----
+
+  var library = { text: '', error: false, count: 0 };
+  var picker = { path: '', display: '', seq: 0 };
+  var lostConnection = false;  // Dropbox anuló el permiso guardado
+
+  function startPhotos() {
+    var folder = Frame.dropboxAuth.isConnected() ? Frame.dropboxAuth.getFolder() : null;
+    library = { text: '', error: false, count: 0 };
+    if (!folder) {
+      Frame.dropboxLibrary.stop();
+      Frame.slideshow.setPhotos(Frame.samplePhotos);
+      updateDropboxUI();
+      return;
+    }
+    Frame.slideshow.setPhotos([], 'Buscando fotos en Dropbox…');
+    Frame.dropboxLibrary.start(folder, Frame.settings.get().dropboxRecursive, {
+      onUpdate: function (list) {
+        library.count = list.length;
+        Frame.slideshow.update(list);
+      },
+      onStatus: function (text, isError) {
+        if (!Frame.dropboxAuth.isConnected()) {
+          // Se anuló el permiso: volver a las fotos de prueba y avisar.
+          lostConnection = true;
+          startPhotos();
+          return;
+        }
+        library.text = text;
+        library.error = isError;
+        if (isError && !library.count) Frame.slideshow.setPhotos([], text);
+        updateDropboxUI();
+      }
+    });
+    updateDropboxUI();
+  }
+
+  function show(id, visible) {
+    var el = $(id);
+    el.className = el.className.replace(/\s*\bhidden\b/g, '') + (visible ? '' : ' hidden');
+  }
+
+  function updateDropboxUI() {
+    var connected = Frame.dropboxAuth.isConnected();
+    var folder = connected ? Frame.dropboxAuth.getFolder() : null;
+    var text;
+    var isError = false;
+    if (!connected) {
+      isError = lostConnection;
+      text = Frame.dropboxAuth.canConnectHere()
+        ? (lostConnection ? 'Dropbox pidió volver a conectar. ' : 'No conectado. ') + 'Se muestran fotos de prueba.'
+        : 'Dropbox solo permite conectar desde la dirección publicada: ' +
+          'https://leonelmerino.github.io/marco-digital/';
+    } else if (!folder) {
+      text = 'Conectado. Elige la carpeta de fotos.';
+    } else {
+      text = 'Carpeta: ' + (folder.name || 'todo Dropbox') + (library.text ? ' · ' + library.text : '');
+      isError = library.error;
+    }
+    $('dropbox-status').textContent = text;
+    $('dropbox-status').className = isError ? 'diag-summary error' : 'diag-summary';
+    show('btn-dropbox-connect', !connected);
+    $('btn-dropbox-connect').disabled = !Frame.dropboxAuth.canConnectHere();
+    show('btn-dropbox-folder', connected);
+    show('btn-dropbox-refresh', !!folder);
+    show('btn-dropbox-disconnect', connected);
+    show('dropbox-recursive-row', !!folder);
+  }
+
+  function dropboxError(message) {
+    $('dropbox-status').textContent = message;
+    $('dropbox-status').className = 'diag-summary error';
+  }
+
+  // ---- Explorador de carpetas ----
+
+  function renderFolders(folders) {
+    var html = '';
+    for (var i = 0; i < folders.length; i++) {
+      html += '<button type="button" class="folder-item" data-path="' + escapeHtml(folders[i].path).replace(/"/g, '&quot;') +
+        '" data-display="' + escapeHtml(folders[i].display).replace(/"/g, '&quot;') + '">' +
+        escapeHtml(folders[i].name) + '</button>';
+    }
+    $('folder-list').innerHTML = html;
+  }
+
+  function browseTo(path, display) {
+    var my = ++picker.seq;
+    picker.path = path;
+    picker.display = display;
+    $('folder-path').textContent = display || 'Dropbox';
+    $('folder-info').textContent = 'Cargando…';
+    $('folder-list').innerHTML = '';
+    $('btn-folder-up').disabled = !path;
+    Frame.dropboxLibrary.browse(path).then(function (result) {
+      if (my !== picker.seq) return;
+      $('folder-info').textContent = (result.photoCount === 1 ? '1 foto' : result.photoCount + ' fotos') + ' aquí' +
+        (result.folders.length ? ', sin contar las subcarpetas' : '') + '.';
+      renderFolders(result.folders);
+    }, function (err) {
+      if (my !== picker.seq) return;
+      $('folder-info').textContent = 'No se pudo abrir la carpeta (' + (err.summary || err.message) + ').';
+    });
+  }
+
+  function parent(path) { return path.slice(0, path.lastIndexOf('/')); }
+
+  function openPicker() {
+    var folder = Frame.dropboxAuth.getFolder();
+    $('folder-sheet').className = 'settings';
+    browseTo(folder ? folder.path : '', folder ? folder.name : '');
+  }
+
+  function closePicker() {
+    picker.seq++;
+    $('folder-sheet').className = 'settings hidden';
+  }
+
+  function bindDropbox() {
+    Frame.slideshow.setLoader(Frame.dropboxLibrary.load);
+
+    // connect() navega a dropbox.com dentro del mismo toque.
+    $('btn-dropbox-connect').addEventListener('click', function () {
+      Frame.dropboxAuth.connect().catch(function (err) { dropboxError('No se pudo conectar: ' + err.message); });
+    });
+    $('btn-dropbox-folder').addEventListener('click', openPicker);
+    $('btn-dropbox-refresh').addEventListener('click', function () {
+      Frame.dropboxLibrary.refresh();
+    });
+    $('btn-dropbox-disconnect').addEventListener('click', function () {
+      if (!global.confirm('¿Desconectar Dropbox? El marco volverá a las fotos de prueba.')) return;
+      Frame.dropboxAuth.disconnect().then(startPhotos);
+    });
+
+    $('folder-list').addEventListener('click', function (event) {
+      var item = event.target.closest ? event.target.closest('.folder-item') : null;
+      if (item) browseTo(item.getAttribute('data-path'), item.getAttribute('data-display'));
+    });
+    $('btn-folder-up').addEventListener('click', function () {
+      browseTo(parent(picker.path), parent(picker.display));
+    });
+    $('btn-folder-use').addEventListener('click', function () {
+      Frame.dropboxAuth.setFolder({ path: picker.path, name: picker.display });
+      closePicker();
+      startPhotos();
+    });
+    $('btn-folder-cancel').addEventListener('click', closePicker);
+  }
+
+  // Al volver de dropbox.com con ?code=…: completar el inicio de sesión.
+  function finishDropboxLogin() {
+    return Frame.dropboxAuth.handleRedirect().then(function (connected) {
+      if (connected) lostConnection = false;
+      if (connected && !Frame.dropboxAuth.getFolder()) {
+        openSettings();
+        openPicker();
+      }
+    }, function (err) {
+      openSettings();
+      dropboxError(err.message);
+    });
+  }
+
   // ---- Configuración ----
 
   function updateDiagnostics() {
@@ -211,6 +374,7 @@
   function openSettings() {
     hideControls();
     updateDiagnostics();
+    updateDropboxUI();
     $('settings').className = 'settings';
   }
 
@@ -284,20 +448,23 @@
     Frame.clock.init(settings);
     Frame.slideshow.init(settings, function (photo) { lastPhoto = photo.name; });
 
-    Frame.settings.onChange(function (s) {
+    Frame.settings.onChange(function (s, changed) {
       applyVisualSettings(s);
       Frame.clock.configure(s);
       Frame.slideshow.configure(s);
+      if (changed === 'dropboxRecursive') startPhotos();
     });
 
     bindControls();
     bindSettings();
     bindRadio(settings);
+    Frame.dropboxAuth.init();
+    bindDropbox();
     bindLifecycle();
     updateConnectivity();
     updatePlayButton();
 
-    Frame.slideshow.setPhotos(Frame.samplePhotos);
+    finishDropboxLogin().then(startPhotos);
     showControls();
   }
 

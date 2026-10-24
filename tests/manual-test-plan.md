@@ -54,6 +54,14 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 34 | Escanear y quedarse | Durante el escaneo, tocar la foto | Se queda en la estación que sonaba; al abrir ♪ Estaciones está marcada | |
 | 35 | Escanear con Listo | Escanear y tocar Listo | Vuelve a las fotos y sigue escaneando | |
 | 32 | Radio tras recargar | Recargar la página | No suena sola; recuerda la última estación elegida | |
+| 37 | Dropbox: conectar | En la dirección publicada: Configuración › Conectar con Dropbox; iniciar sesión; permitir | Vuelve al marco y abre «Elegir carpeta»; la dirección no muestra `code=` | |
+| 38 | Dropbox: elegir carpeta | Navegar hasta la carpeta de fotos › Usar esta carpeta | Aparecen fotos de esa carpeta; Configuración muestra el número de fotos | |
+| 39 | Dropbox: carpeta grande | Usar la carpeta de 10 años | La primera foto sale en pocos segundos; el número sube hasta el total; anotar cuánto tarda la lista completa | |
+| 40 | Dropbox: HEIC | Incluir fotos .heic del iPhone | Anotar si se ven o si el diagnóstico muestra fallos de miniatura | |
+| 41 | Dropbox: foto nueva | Subir una foto a la carpeta; tocar «Buscar fotos nuevas» | El número aumenta en 1 | |
+| 42 | Dropbox: recarga | Recargar la página | Sigue conectado y vuelve a listar la carpeta sin pedir nada | |
+| 43 | Dropbox: desconectar | Desconectar | Vuelven las fotos de prueba; en dropbox.com ya no aparece como aplicación conectada | |
+| 44 | Dropbox: pantalla de inicio | Abrir desde el icono de la pantalla de inicio | Anotar si pide conectar de nuevo y si el inicio de sesión vuelve al marco | |
 | 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 
 ## Cómo registrar un fallo

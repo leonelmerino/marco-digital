@@ -5,8 +5,10 @@
  * Image por fotografía: la capa oculta sirve también para precargar la
  * siguiente foto. Así, como mucho hay dos imágenes decodificadas en memoria.
  *
- * La fuente de fotos es una lista de { url, name }. En la fase 1 son fotos de
- * prueba locales; en la fase 3 la proporcionará el adaptador de Dropbox.
+ * La fuente de fotos es una lista de { name, url } (fotos de prueba locales)
+ * o de { name, path } (Dropbox). Las segundas se piden al cargador
+ * (setLoader), que entrega una URL blob: de la miniatura; cada capa revoca su
+ * URL blob anterior al cargar otra, así nunca hay más de dos vivas.
  */
 (function (global) {
   'use strict';
@@ -30,6 +32,7 @@
   var opts = { interval: 30, order: 'random', transition: 'fade' };
   var emptyEl;
   var onShow = null;
+  var loader = null;       // function (photo, callback(err, blobUrl))
 
   function backLayer() { return layers[1 - front]; }
 
@@ -78,18 +81,48 @@
 
   function photoAt(p) { return photos[order[p]]; }
 
+  function keyOf(photo) { return photo.url || photo.path; }
+
+  function sortByName(list) {
+    list.sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; });
+  }
+
   // ---- Carga en una capa ----
 
-  function loadInto(el, url, done) {
-    if (el._url === url && el._state === 'ok') {
+  function setSource(el, src, isBlob) {
+    if (el._blob) global.URL.revokeObjectURL(el._blob);
+    el._blob = isBlob ? src : null;
+    el.src = src;
+  }
+
+  function finish(el, ok) {
+    el._state = ok ? 'ok' : 'error';
+    if (el._done) el._done(ok);
+  }
+
+  function loadInto(el, photo, done) {
+    var key = keyOf(photo);
+    if (el._key === key && el._state === 'ok') {
       if (done) done(true);
       return;
     }
-    el.onload = function () { el._state = 'ok'; if (done) done(true); };
-    el.onerror = function () { el._state = 'error'; if (done) done(false); };
-    el._url = url;
+    el._key = key;
     el._state = 'loading';
-    el.src = url;
+    el._done = done;
+    el.onload = function () { finish(el, true); };
+    el.onerror = function () { finish(el, false); };
+    if (photo.url) {
+      setSource(el, photo.url, false);
+      return;
+    }
+    loader(photo, function (err, blobUrl) {
+      if (el._key !== key) { // la capa ya se usa para otra foto
+        if (blobUrl) global.URL.revokeObjectURL(blobUrl);
+        return;
+      }
+      if (err) finish(el, false);
+      else setSource(el, blobUrl, true);
+    });
   }
 
   function showAt(p) {
@@ -99,13 +132,15 @@
     var my = ++seq;
     var photo = photoAt(pos);
     var el = backLayer();
-    if (el._url === photo.url && el._state === 'loading') {
+    if (el._key === keyOf(photo) && el._state === 'loading') {
       // La precarga sigue en curso: reutilizarla en vez de reiniciar la descarga.
-      el.onload = function () { el._state = 'ok'; if (my === seq) reveal(photo); };
-      el.onerror = function () { el._state = 'error'; if (my === seq) failed(photo); };
+      el._done = function (ok) {
+        if (my !== seq) return;
+        if (ok) reveal(photo); else failed(photo);
+      };
       return;
     }
-    loadInto(el, photo.url, function (ok) {
+    loadInto(el, photo, function (ok) {
       if (my !== seq) return;
       if (ok) reveal(photo); else failed(photo);
     });
@@ -135,7 +170,7 @@
       if (my !== seq) return;
       ensureAhead();
       var next = photoAt(pos + 1);
-      if (next) loadInto(backLayer(), next.url, null);
+      if (next) loadInto(backLayer(), next, null);
     }, delay);
   }
 
@@ -182,7 +217,7 @@
 
   // ---- API pública ----
 
-  function setPhotos(list) {
+  function setPhotos(list, emptyMessage) {
     clearTimers();
     seq++;
     photos = list.slice();
@@ -190,13 +225,51 @@
     pos = -1;
     failures = 0;
     if (!photos.length) {
+      showEmpty(emptyMessage || 'No hay fotografías para mostrar.');
+      return;
+    }
+    if (opts.order === 'sequential') sortByName(photos);
+    showAt(0);
+  }
+
+  function indexOfKey(key) {
+    for (var i = 0; i < photos.length; i++) if (keyOf(photos[i]) === key) return i;
+    return -1;
+  }
+
+  // Sustituye la lista (por ejemplo, al llegar más fotos de Dropbox) sin
+  // interrumpir la foto actual ni la que ya se está precargando.
+  function update(list) {
+    var current = pos >= 0 ? photoAt(pos) : null;
+    var upcoming = pos >= 0 ? photoAt(pos + 1) : null;
+    if (!current) {
+      setPhotos(list);
+      return;
+    }
+    photos = list.slice();
+    if (!photos.length) {
+      clearTimers();
+      seq++;
+      order = [];
+      pos = -1;
       showEmpty('No hay fotografías para mostrar.');
       return;
     }
+    if (opts.order === 'sequential') sortByName(photos);
+    var ci = indexOfKey(keyOf(current));
+    order = [];
     if (opts.order === 'sequential') {
-      photos.sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; });
+      var from = ci >= 0 ? ci : 0;
+      for (var i = 0; i < photos.length; i++) order.push((from + i) % photos.length);
+    } else {
+      if (ci >= 0) order.push(ci);
+      var ni = upcoming ? indexOfKey(keyOf(upcoming)) : -1;
+      if (ni >= 0 && ni !== ci) order.push(ni);
     }
-    showAt(0);
+    pos = ci >= 0 ? 0 : -1; // si la actual desapareció, la siguiente es order[0]
+    ensureAhead();
+    // Esperar al final del fundido antes de tocar la capa oculta.
+    if (playing) schedulePreload(Math.max(50, FADE_MS - (Date.now() - shownAt)));
   }
 
   function configure(settings) {
@@ -208,9 +281,7 @@
     if (orderChanged && photos.length) {
       // Conservar la foto actual y rehacer lo que viene después.
       var current = pos >= 0 ? photos[order[pos]] : null;
-      if (opts.order === 'sequential') {
-        photos.sort(function (a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; });
-      }
+      if (opts.order === 'sequential') sortByName(photos);
       var idx = current ? photos.indexOf(current) : 0;
       order = [idx];
       pos = 0;
@@ -219,7 +290,7 @@
       }
       ensureAhead();
       var back = backLayer();
-      back._url = null; // descartar la precarga obsoleta
+      back._key = null; // descartar la precarga obsoleta
       schedulePreload(50);
     }
     if (intervalChanged && pos >= 0) startTimer(opts.interval * 1000);
@@ -234,6 +305,8 @@
     },
     configure: configure,
     setPhotos: setPhotos,
+    update: update,
+    setLoader: function (fn) { loader = fn; },
     next: function () { if (photos.length) showAt(pos + 1); },
     prev: function () { if (photos.length) showAt(Math.max(0, pos - 1)); },
     play: function () { playing = true; resume(); },

@@ -12,7 +12,7 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | --- | --- | --- |
 | 1 | Reloj, fotos de prueba, fundido, controles, configuración | Validada en el iPad (falta la prueba de varias horas) |
 | 2 | Publicación en GitHub Pages | Publicada; pendiente de validar en el iPad |
-| 3 | Fotos desde una carpeta privada de Dropbox (OAuth 2.0 + PKCE) | Sin empezar |
+| 3 | Fotos desde una carpeta de Dropbox (OAuth 2.0 + PKCE), también carpetas muy grandes | Implementada; pendiente de probar con la cuenta real y en el iPad |
 | 4 | Radio por internet: 14 estaciones chilenas predefinidas y función Escanear (sustituye a Internet Archive) | Implementada; validada en parte en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
@@ -28,7 +28,9 @@ Una fase solo se da por terminada después de probarla en el iPad real
 3. En **♪ Estaciones** eliges una estación; suena al tocarla. **Escanear**
    pasa por todas, 5 segundos cada una y sin silencios entre ellas; toca
    cualquier cosa para quedarte en la que suena. El volumen se ajusta con los botones del iPad.
-4. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
+4. En **Configuración › Dropbox** conectas tu cuenta y eliges la carpeta de
+   fotos (desde la dirección publicada, no desde la red local).
+5. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, el reloj, la fecha y el modo nocturno.
 5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
    Bloqueo automático › Nunca**. Para que nadie salga de Safari, puedes usar

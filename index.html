@@ -149,9 +149,18 @@
             Ajustes &rsaquo; Pantalla y brillo &rsaquo; Bloqueo automático &rsaquo; Nunca.</p>
         </section>
 
-        <section class="disabled">
+        <section>
           <h2>Dropbox</h2>
-          <p class="note">Disponible en la fase 3. Ahora se muestran fotografías de prueba.</p>
+          <div id="dropbox-status" class="diag-summary"></div>
+          <div class="row-buttons">
+            <button type="button" id="btn-dropbox-connect">Conectar con Dropbox</button>
+            <button type="button" id="btn-dropbox-folder" class="hidden">Elegir carpeta</button>
+            <button type="button" id="btn-dropbox-refresh" class="hidden">Buscar fotos nuevas</button>
+            <button type="button" id="btn-dropbox-disconnect" class="hidden">Desconectar</button>
+          </div>
+          <label id="dropbox-recursive-row" class="row hidden">Incluir subcarpetas <input type="checkbox" name="dropboxRecursive"></label>
+          <p class="note">El marco solo lee: muestra una versión reducida de cada foto y nunca
+            modifica ni borra nada en tu Dropbox. Busca fotos nuevas cada 30 minutos.</p>
         </section>
 
         <section>
@@ -172,6 +181,23 @@
     </div>
   </div>
 
+  <!-- Explorador de carpetas de Dropbox -->
+  <div id="folder-sheet" class="settings hidden" role="dialog" aria-labelledby="folder-title">
+    <div class="settings-panel">
+      <div class="settings-head">
+        <h1 id="folder-title">Elegir carpeta</h1>
+        <button type="button" id="btn-folder-cancel" class="btn-plain">Cancelar</button>
+      </div>
+      <div id="folder-path" class="folder-path"></div>
+      <div id="folder-info" class="note"></div>
+      <div class="row-buttons">
+        <button type="button" id="btn-folder-up">&lsaquo; Subir</button>
+        <button type="button" id="btn-folder-use" class="btn-primary">Usar esta carpeta</button>
+      </div>
+      <div id="folder-list" class="folder-list"></div>
+    </div>
+  </div>
+
   <div id="debug" class="debug hidden" aria-live="polite"></div>
 
   <!-- Scripts clásicos (sin módulos ni compilación) para Safari de iOS 12 -->
@@ -183,6 +209,10 @@
   <script src="assets/js/slideshow.js"></script>
   <script src="assets/js/sample-photos.js"></script>
   <script src="assets/js/radio/radio-player.js"></script>
+  <script src="assets/js/dropbox/config.js"></script>
+  <script src="assets/js/dropbox/auth.js"></script>
+  <script src="assets/js/dropbox/api.js"></script>
+  <script src="assets/js/dropbox/library.js"></script>
   <script src="assets/js/app.js"></script>
 </body>
 </html>

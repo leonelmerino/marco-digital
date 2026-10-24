@@ -2,7 +2,8 @@
  * Almacenamiento de preferencias.
  * localStorage puede fallar (navegación privada, cuota, datos borrados por iOS),
  * así que toda lectura y escritura va en try/catch y hay respaldo en memoria.
- * Aquí solo se guardan preferencias, nunca credenciales ni datos personales.
+ * Se guardan preferencias y, con Dropbox conectado, su token de renovación
+ * (ver docs/security.md). Nunca contraseñas ni fotos.
  */
 (function (global) {
   'use strict';
