@@ -31,14 +31,15 @@
   <!-- Controles: aparecen al tocar la pantalla -->
   <div id="controls" class="controls">
     <div id="radio-now" class="radio-now hidden"></div>
-    <button type="button" id="btn-prev" class="ctl" aria-label="Anterior">&#8249;</button>
-    <button type="button" id="btn-play" class="ctl" aria-label="Pausar">&#10074;&#10074;</button>
-    <button type="button" id="btn-next" class="ctl" aria-label="Siguiente">&#8250;</button>
-    <button type="button" id="btn-radio" class="ctl ctl-wide">&#9834; Radio</button>
+    <button type="button" id="btn-play" class="ctl ctl-wide ctl-toggle on" aria-label="Pausar fotos">&#10074;&#10074; Fotos</button>
+    <button type="button" id="btn-radio-play" class="ctl ctl-wide ctl-toggle" aria-label="Escuchar radio">&#9654;&#xFE0E; Radio</button>
+    <button type="button" id="btn-radio" class="ctl ctl-wide">&#9834; Estaciones</button>
     <button type="button" id="btn-settings" class="ctl ctl-wide">Configuración</button>
   </div>
 
+  <!-- Dos canales: al escanear, el segundo conecta la siguiente en silencio -->
   <audio id="radio-audio" preload="none"></audio>
+  <audio id="radio-audio-2" preload="none"></audio>
 
   <!-- Radio: estaciones predefinidas -->
   <div id="radio-sheet" class="settings hidden" role="dialog" aria-labelledby="radio-title">
@@ -155,7 +156,7 @@
 
         <section>
           <h2>Radio</h2>
-          <p class="note">Usa el botón &#9834; Radio de los controles para elegir una estación.</p>
+          <p class="note">Usa el botón &#9834; Estaciones de los controles para elegir una estación.</p>
         </section>
 
         <section>

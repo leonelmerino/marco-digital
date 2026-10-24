@@ -38,6 +38,7 @@ con cada prueba en el dispositivo.
 | Radio con la pantalla bloqueada | Sí (23-10-2026) | Siguió sonando |
 | Radio: reconexión tras modo avión | Sí (23-10-2026) | Se cortó a los ~8 s y volvió sola al recuperar la red |
 | Radio: `play()` sin toque al escanear | Pendiente | Necesario para pasar de estación sola |
+| Radio: dos `<audio>` a la vez (uno silenciado) | Pendiente | Escaneo sin silencios; si falla se ve «escaneo con un canal» en el diagnóstico |
 | Funcionamiento continuo durante varias horas | Pendiente | |
 
 El panel de diagnóstico (Configuración › Estado y diagnóstico) muestra la

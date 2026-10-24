@@ -152,6 +152,8 @@ body.controls-visible .controls { opacity: 1; pointer-events: auto; }
 }
 .ctl-wide { font-size: 18px; padding: 0 24px; }
 .ctl:active { background: rgba(255, 255, 255, 0.35); }
+.ctl-toggle { min-width: 132px; }
+.ctl-toggle.on { background: rgba(10, 132, 255, 0.7); }
 
 .radio-now {
   margin-bottom: 12px;

@@ -42,7 +42,18 @@ El botón **Escanear** recorre las estaciones en orden y en bucle infinito
 - Si la radio estaba sonando, empieza por la siguiente; si no, por la actual.
 - Cada estación suena **5 segundos contados desde que empieza el sonido**, para
   que las que tardan en conectar no se oigan menos.
-- Una estación que no suena en 8 s, o que falla, se salta sin reintentos.
+- **Sin silencio entre estaciones:** hay dos `<audio>`. Mientras una estación
+  suena, el otro conecta la siguiente con el sonido silenciado (`muted`). El
+  cambio se hace cuando la actual ya sonó sus 5 s **y** la siguiente ya tiene
+  sonido: se quita el silencio a la nueva y se suelta la anterior. Si la
+  siguiente tarda, la actual sigue sonando un poco más.
+- Una estación que no suena en 8 s, o que falla, se salta sin reintentos y sin
+  cortar la que suena.
+- El segundo `<audio>` queda habilitado al tocar Escanear (iOS exige un toque
+  para el primer `play()` de cada `<audio>`). Si el iPad no deja usarlo, o no
+  deja sonar dos `<audio>` a la vez, el escaneo sigue con uno solo y hay un
+  silencio de 1–2 s en cada cambio; queda anotado en el diagnóstico.
+- Mientras escanea se descargan dos señales a la vez (unos 256 kbps).
 - **Cualquier toque** lo detiene y deja sonando la estación actual, que queda
   guardada como elegida: tocar la pantalla, un botón, una estación o «Quedarme
   aquí». Tocar ■ lo detiene y apaga la radio. Cerrar la ventana de radio
@@ -59,8 +70,8 @@ El botón **Escanear** recorre las estaciones en orden y en bucle infinito
 
 ## Comportamiento en iOS
 
-- **Sin reproducción automática:** la radio empieza solo al tocar una estación
-  o ▶. Nunca arranca al cargar la página.
+- **Sin reproducción automática:** la radio empieza solo al tocar una estación,
+  ▶ o «▶ Radio» en los controles. Nunca arranca al cargar la página.
 - **Volumen:** Safari de iOS ignora el volumen fijado por la página. En el iPad
   se oculta el control y se usan los botones laterales. En el Mac sí funciona.
 - **Detener, no pausar:** al detener se suelta la conexión; al volver a tocar ▶

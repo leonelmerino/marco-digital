@@ -46,19 +46,22 @@
     setBodyClass('controls-visible', false);
   }
 
+  // Botón de dos estados: ▶ cuando está detenido, ❚❚ cuando avanza o suena.
+  // &#xFE0E; evita que iOS dibuje ▶ como emoji.
+  function setToggle(btn, on, label) {
+    btn.innerHTML = (on ? '&#10074;&#10074; ' : '&#9654;&#xFE0E; ') + label;
+    btn.className = on ? 'ctl ctl-wide ctl-toggle on' : 'ctl ctl-wide ctl-toggle';
+    btn.setAttribute('aria-label', (on ? 'Pausar ' : 'Reproducir ') + label.toLowerCase());
+  }
+
   function updatePlayButton() {
-    var btn = $('btn-play');
-    var playing = Frame.slideshow.isPlaying();
-    btn.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
-    btn.setAttribute('aria-label', playing ? 'Pausar' : 'Reanudar');
+    setToggle($('btn-play'), Frame.slideshow.isPlaying(), 'Fotos');
   }
 
   function bindControls() {
     $('stage').addEventListener('click', function () {
       if (controlsVisible()) hideControls(); else showControls();
     });
-    $('btn-prev').addEventListener('click', function () { Frame.slideshow.prev(); showControls(); });
-    $('btn-next').addEventListener('click', function () { Frame.slideshow.next(); showControls(); });
     $('btn-play').addEventListener('click', function () {
       if (Frame.slideshow.isPlaying()) Frame.slideshow.pause(); else Frame.slideshow.play();
       updatePlayButton();
@@ -101,6 +104,7 @@
     toggle.innerHTML = on ? '&#9632;' : '&#9654;';
     toggle.className = on ? 'radio-toggle on' : 'radio-toggle';
     toggle.setAttribute('aria-label', on ? 'Detener' : 'Escuchar');
+    setToggle($('btn-radio-play'), on, 'Radio');
 
     // Con la radio encendida se marca la que suena (también al escanear).
     var highlighted = state.status !== 'off' && station ? station.id : selected;
@@ -154,10 +158,12 @@
       Frame.settings.set('radioStation', id);
       Frame.radio.play(id);
     });
-    $('btn-radio-toggle').addEventListener('click', function () {
+    function toggleRadio() {
       if (!Frame.radio.isOn()) Frame.radio.play(Frame.settings.get().radioStation);
       else Frame.radio.toggle();
-    });
+    }
+    $('btn-radio-toggle').addEventListener('click', toggleRadio);
+    $('btn-radio-play').addEventListener('click', function () { toggleRadio(); showControls(); });
     $('btn-scan').addEventListener('click', function () {
       if (Frame.radio.isScanning()) stopScanHere();
       else Frame.radio.startScan();

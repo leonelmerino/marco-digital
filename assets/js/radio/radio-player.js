@@ -1,18 +1,22 @@
 /*
- * Reproductor de radio por internet con un único <audio>.
+ * Reproductor de radio por internet con dos <audio> («canales»).
  *
  * - Safari no permite sonido automático: `play()` solo funciona si se llama
  *   dentro de un toque del usuario. Por eso la radio nunca arranca sola al
- *   cargar la página.
+ *   cargar la página. Cada <audio> queda habilitado tras su primer `play()`
+ *   dentro de un toque; después se le puede cambiar la señal sin toque.
  * - En una señal en directo, pausar deja de tener sentido (al reanudar
  *   estaría atrasada), así que «detener» suelta la conexión y «reproducir»
  *   vuelve a conectar con la señal actual.
  * - En iOS el volumen de la página no se puede cambiar (`audio.volume` se
- *   ignora); se usan los botones del iPad.
+ *   ignora); se usan los botones del iPad. `muted` sí funciona.
  *
- * - Escanear: recorre las estaciones en bucle; cada una suena SCAN_LISTEN_MS
- *   desde que empieza el sonido (no desde que se pide) y las que no conectan
- *   se saltan sin reintentos. Cualquier acción del usuario lo detiene.
+ * - Escanear: recorre las estaciones en bucle. Mientras una suena, el otro
+ *   canal conecta la siguiente en silencio; el cambio se hace cuando la actual
+ *   ya sonó SCAN_LISTEN_MS y la siguiente ya tiene sonido, así no hay silencio
+ *   entre estaciones. Las que no conectan se saltan sin reintentos. Si el
+ *   iPad no deja sonar dos <audio> a la vez, se usa un solo canal (con un
+ *   breve silencio en cada cambio). Cualquier acción del usuario lo detiene.
  *
  * Estados: off, connecting, playing, blocked (falta un toque), error.
  */
@@ -26,202 +30,305 @@
   var SCAN_LISTEN_MS = 5000;      // tiempo que suena cada estación al escanear
   var SCAN_CONNECT_MS = 8000;     // al escanear, saltar la que tarda más que esto
 
-  var audio = null;
   var stations = [];
-  var station = null;
+  var channels = [];
+  var main = null;         // canal que se oye
+  var next = null;         // al escanear: canal que conecta la siguiente, en silencio
   var wanted = false;      // el usuario quiere escuchar
-  var urlIndex = 0;
   var retries = 0;
-  var attemptId = 0;       // un fallo solo cuenta una vez por intento
-  var failedAttempt = -1;
   var retryTimer = null;
-  var watchdog = null;
   var scanning = false;
   var scanTimer = null;
+  var listenDone = false;  // la estación actual ya sonó su turno (o falló)
+  var gapless = true;      // false si el iPad no deja sonar dos <audio> a la vez
+  var volume = 1;
   var state = { status: 'off', message: '', station: null, scanning: false };
   var listeners = [];
+
+  function log(text, isError) { Frame.compat.log(text, isError); }
 
   function find(id) {
     for (var i = 0; i < stations.length; i++) if (stations[i].id === id) return stations[i];
     return stations[0] || null;
   }
 
+  function following(station) {
+    return stations[(stations.indexOf(station) + 1) % stations.length];
+  }
+
   function setState(status, message) {
-    state = { status: status, message: message || '', station: station, scanning: scanning };
+    state = { status: status, message: message || '', station: main.station, scanning: scanning };
     for (var i = 0; i < listeners.length; i++) listeners[i](state);
   }
 
-  function clearTimers() {
-    clearTimeout(retryTimer);
-    clearTimeout(watchdog);
-    retryTimer = null;
-    watchdog = null;
+  // ---- Canales ----
+
+  function makeChannel(el) {
+    var ch = { el: el, station: null, urlIndex: 0, attemptId: 0, failedAttempt: -1, watchdog: null, live: false };
+    bindChannel(ch);
+    return ch;
   }
 
-  function armWatchdog() {
-    clearTimeout(watchdog);
-    watchdog = setTimeout(function () {
-      if (wanted && state.status === 'connecting') failed('sin respuesta');
+  function other(ch) { return ch === channels[0] ? channels[1] : channels[0]; }
+
+  function inUse(ch) { return wanted && (ch === main || ch === next); }
+
+  function arm(ch) {
+    var my = ch.attemptId;
+    clearTimeout(ch.watchdog);
+    ch.watchdog = setTimeout(function () {
+      if (my === ch.attemptId && !ch.live) fail(ch, 'sin respuesta');
     }, scanning ? SCAN_CONNECT_MS : CONNECT_TIMEOUT_MS);
   }
 
-  // Debe llamarse de forma síncrona dentro del toque para que iOS lo permita.
-  function attempt() {
-    if (!wanted || !station) return;
-    var url = station.urls[urlIndex];
-    var my = ++attemptId;
-    setState('connecting', scanning ? 'Escaneando…' : retries ? 'Reconectando…' : 'Conectando…');
-    armWatchdog();
-    audio.src = url;
-    var promise = audio.play();
+  // Para el canal principal debe llamarse dentro del toque la primera vez.
+  function load(ch, muted) {
+    var my = ++ch.attemptId;
+    ch.live = false;
+    arm(ch);
+    ch.el.muted = muted;
+    ch.el.volume = volume;
+    ch.el.src = ch.station.urls[ch.urlIndex];
+    var promise = ch.el.play();
     if (promise && typeof promise.catch === 'function') {
       promise.catch(function (err) {
-        if (!wanted || my !== attemptId) return;
-        if (err && err.name === 'NotAllowedError') {
-          clearTimers();
-          endScan();
-          setState('blocked', 'Toca ▶ para escuchar');
-        } else if (err && err.name !== 'AbortError') {
-          failed(err.name || 'error');
-        }
+        if (my !== ch.attemptId || !inUse(ch)) return;
+        if (err && err.name === 'NotAllowedError') blocked(ch);
+        else if (err && err.name !== 'AbortError') fail(ch, err.name || 'error');
       });
     }
   }
 
-  function failed(reason) {
+  function release(ch) {
+    ch.attemptId++; // descarta eventos y promesas pendientes
+    ch.live = false;
+    clearTimeout(ch.watchdog);
+    ch.el.pause();
+    ch.el.removeAttribute('src');
+    try { ch.el.load(); } catch (e) { /* algunos navegadores lanzan sin src */ }
+  }
+
+  function connectMain() {
+    setState('connecting', scanning ? 'Escaneando…' : retries ? 'Reconectando…' : 'Conectando…');
+    load(main, false);
+  }
+
+  function blocked(ch) {
+    if (ch === next) {
+      // El segundo <audio> no quedó habilitado: escanear con un solo canal.
+      log('Radio: el iPad no deja precargar en silencio; escaneo con un canal', true);
+      gapless = false;
+      release(next);
+      next = null;
+      advance();
+      return;
+    }
+    clearTimeout(retryTimer);
+    endScan();
+    setState('blocked', 'Toca ▶ para escuchar');
+  }
+
+  function fail(ch, reason) {
     // El evento `error` y el rechazo de play() suelen llegar juntos.
-    if (!wanted || failedAttempt === attemptId) return;
-    failedAttempt = attemptId;
-    clearTimers();
-    Frame.compat.log('Radio ' + station.name + ': fallo (' + reason + ') en la URL ' + (urlIndex + 1), true);
-    if (urlIndex + 1 < station.urls.length) {
-      urlIndex++;
-      attempt();
+    if (!inUse(ch) || ch.failedAttempt === ch.attemptId) return;
+    ch.failedAttempt = ch.attemptId;
+    ch.live = false;
+    clearTimeout(ch.watchdog);
+    log('Radio ' + ch.station.name + (ch === next ? ' (precarga)' : '') +
+      ': fallo (' + reason + ') en la URL ' + (ch.urlIndex + 1), true);
+    if (ch.urlIndex + 1 < ch.station.urls.length) {
+      ch.urlIndex++;
+      if (ch === main) connectMain(); else load(ch, true);
+      return;
+    }
+    if (ch === next) {
+      preload(following(ch.station)); // se salta y se precarga la siguiente
       return;
     }
     if (scanning) {
-      scanNext(); // al escanear no se insiste: se pasa a la siguiente
+      listenDone = true; // al escanear no se insiste: se pasa a la siguiente
+      setState('connecting', 'Escaneando…');
+      advance();
       return;
     }
     if (retries < MAX_RETRIES) {
       retries++;
-      urlIndex = 0;
+      main.urlIndex = 0;
       setState('connecting', 'Reconectando…');
-      retryTimer = setTimeout(attempt, 2000 * retries);
+      retryTimer = setTimeout(connectMain, 2000 * retries);
       return;
     }
-    release();
-    setState('error', 'No se pudo conectar con ' + station.name);
+    release(main);
+    setState('error', 'No se pudo conectar con ' + main.station.name);
   }
 
-  function release() {
-    audio.pause();
-    audio.removeAttribute('src');
-    try { audio.load(); } catch (e) { /* algunos navegadores lanzan sin src */ }
+  function onMainLive() {
+    clearTimeout(retryTimer);
+    retries = 0;
+    if (scanning) {
+      listenDone = false;
+      clearTimeout(scanTimer);
+      scanTimer = setTimeout(function () { listenDone = true; advance(); }, SCAN_LISTEN_MS);
+    }
+    setState('playing', scanning ? 'Escaneando…' : 'Sonando');
+    log('Radio ' + main.station.name + ': sonando (URL ' + (main.urlIndex + 1) + ')');
   }
 
-  function bindAudio() {
-    audio.addEventListener('playing', function () {
-      if (!wanted) return;
-      clearTimers();
-      retries = 0;
-      if (scanning) {
-        clearTimeout(scanTimer);
-        scanTimer = setTimeout(scanNext, SCAN_LISTEN_MS);
-      }
-      setState('playing', scanning ? 'Escaneando…' : 'Sonando');
-      Frame.compat.log('Radio ' + station.name + ': sonando (URL ' + (urlIndex + 1) + ')');
+  function bindChannel(ch) {
+    var el = ch.el;
+    el.addEventListener('playing', function () {
+      if (!inUse(ch)) return;
+      ch.live = true;
+      clearTimeout(ch.watchdog);
+      if (ch === main) onMainLive();
+      else advance(); // la siguiente ya suena en silencio
     });
-    audio.addEventListener('waiting', function () {
-      if (wanted && state.status === 'playing') {
-        setState('connecting', 'Cargando…');
-        armWatchdog();
-      }
+    el.addEventListener('waiting', function () {
+      if (!inUse(ch) || !ch.live) return;
+      ch.live = false;
+      arm(ch);
+      if (ch === main) setState('connecting', 'Cargando…');
     });
-    audio.addEventListener('error', function () {
-      if (!wanted || !audio.getAttribute('src')) return;
-      var code = audio.error ? audio.error.code : '?';
-      failed('código ' + code);
+    el.addEventListener('error', function () {
+      if (!el.getAttribute('src')) return;
+      fail(ch, 'código ' + (el.error ? el.error.code : '?'));
     });
     // Una señal en directo no debería terminar: si termina, se cortó.
-    audio.addEventListener('ended', function () { failed('señal terminada'); });
-    // iOS puede pausar el audio (llamada, otra app con sonido).
-    audio.addEventListener('pause', function () {
-      if (wanted && state.status === 'playing') {
-        endScan();
-        setState('blocked', 'En pausa · toca ▶ para seguir');
+    el.addEventListener('ended', function () { fail(ch, 'señal terminada'); });
+    el.addEventListener('pause', function () {
+      if (!inUse(ch) || ch !== main || state.status !== 'playing') return;
+      if (scanning && next) {
+        // Al empezar el segundo <audio>, iOS pausó el primero.
+        log('Radio: el iPad no deja sonar dos señales a la vez; escaneo con un canal', true);
+        gapless = false;
+        main.live = false;
+        listenDone = true;
+        setState('connecting', 'Escaneando…');
+        advance();
+        return;
       }
+      // iOS puede pausar el audio (llamada, otra app con sonido).
+      endScan();
+      setState('blocked', 'En pausa · toca ▶ para seguir');
     });
   }
 
   // ---- Escaneo ----
 
+  function preload(station) {
+    if (!scanning || !gapless || stations.length < 2) return;
+    if (station === main.station) station = following(station);
+    next = other(main);
+    next.station = station;
+    next.urlIndex = 0;
+    load(next, true);
+  }
+
+  // La siguiente pasa a sonar: se quita el silencio y se suelta la anterior.
+  function promote() {
+    var old = main;
+    main = next;
+    next = null;
+    main.el.muted = false;
+    release(old);
+    onMainLive();
+    preload(following(main.station));
+  }
+
+  // Avanza cuando la actual ya cumplió su turno.
+  function advance() {
+    if (!scanning || !listenDone) return;
+    if (next) {
+      if (next.live) promote(); // si no, se espera a que tenga sonido
+      return;
+    }
+    if (gapless) {
+      preload(following(main.station));
+      return;
+    }
+    // Un solo canal: se cambia la señal y hay un silencio mientras conecta.
+    main.station = following(main.station);
+    main.urlIndex = 0;
+    listenDone = false;
+    connectMain();
+  }
+
   function endScan() {
     scanning = false;
+    listenDone = false;
     clearTimeout(scanTimer);
     scanTimer = null;
+    if (next) {
+      release(next);
+      next = null;
+    }
   }
 
-  function scanNext() {
-    if (!scanning) return;
-    clearTimers();
-    clearTimeout(scanTimer);
-    var index = stations.indexOf(station);
-    station = stations[(index + 1) % stations.length];
-    urlIndex = 0;
-    retries = 0;
-    attempt();
-  }
-
-  // Debe llamarse dentro de un toque, como play().
+  // Debe llamarse dentro de un toque: habilita el segundo <audio>.
   function startScan() {
     if (!stations.length) return;
-    var wasPlaying = wanted && state.status === 'playing';
-    clearTimers();
+    clearTimeout(retryTimer);
+    var wasPlaying = wanted && main.live;
     scanning = true;
     wanted = true;
+    retries = 0;
     if (wasPlaying) {
-      scanNext();
+      listenDone = true; // pasar a la siguiente en cuanto tenga sonido
+      setState('playing', 'Escaneando…');
+      advance();
     } else {
-      urlIndex = 0;
-      retries = 0;
-      attempt(); // empezar por la estación actual
+      listenDone = false;
+      main.urlIndex = 0;
+      connectMain(); // empezar por la estación actual
+      preload(following(main.station));
     }
   }
 
   // Detener el escaneo y quedarse en la estación que está sonando.
   function stopScan() {
     if (!scanning) return;
+    if (next && next.live && !main.live) {
+      var old = main;
+      main = next;
+      next = null;
+      main.el.muted = false;
+      release(old);
+    }
     endScan();
-    if (state.status === 'playing') setState('playing', 'Sonando');
-    else setState(state.status, state.status === 'connecting' ? 'Conectando…' : state.message);
+    if (main.live) {
+      setState('playing', 'Sonando');
+    } else {
+      retries = 0;
+      main.urlIndex = 0;
+      connectMain();
+    }
   }
 
   // ---- API pública ----
 
   function play(id) {
     endScan();
-    clearTimers();
-    station = find(id || (station && station.id));
-    if (!station) return;
+    clearTimeout(retryTimer);
+    main.station = find(id || (main.station && main.station.id));
+    if (!main.station) return;
     wanted = true;
-    urlIndex = 0;
     retries = 0;
-    attempt();
+    main.urlIndex = 0;
+    connectMain();
   }
 
   function stop() {
     endScan();
     wanted = false;
-    clearTimers();
-    release();
+    clearTimeout(retryTimer);
+    release(main);
     setState('off', '');
   }
 
   function resume() {
     // Al volver a primer plano: si el usuario quería escuchar y se cortó.
-    if (wanted && audio.paused && state.status !== 'connecting') {
-      var promise = audio.play();
+    if (wanted && main.el.paused && state.status !== 'connecting') {
+      var promise = main.el.play();
       if (promise && typeof promise.catch === 'function') {
         promise.catch(function () { setState('blocked', 'Toca ▶ para escuchar'); });
       }
@@ -231,9 +338,12 @@
   Frame.radio = {
     init: function (stationList, initialId) {
       stations = stationList;
-      audio = document.getElementById('radio-audio');
-      station = find(initialId);
-      bindAudio();
+      channels = [
+        makeChannel(document.getElementById('radio-audio')),
+        makeChannel(document.getElementById('radio-audio-2'))
+      ];
+      main = channels[0];
+      main.station = find(initialId);
       setState('off', '');
     },
     play: play,
@@ -244,7 +354,10 @@
     toggle: function () { if (wanted && state.status !== 'blocked' && state.status !== 'error') stop(); else play(); },
     resume: resume,
     isOn: function () { return wanted; },
-    setVolume: function (percent) { if (audio) audio.volume = Math.max(0, Math.min(1, percent / 100)); },
+    setVolume: function (percent) {
+      volume = Math.max(0, Math.min(1, percent / 100));
+      for (var i = 0; i < channels.length; i++) channels[i].el.volume = volume;
+    },
     getState: function () { return state; },
     onChange: function (fn) { listeners.push(fn); }
   };

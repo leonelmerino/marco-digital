@@ -25,12 +25,12 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 4 | Varias fotos | Esperar 3 intervalos (30 s c/u) | Cambia la foto cada ~30 s | |
 | 5 | Fundido | Observar un cambio | Transición suave, sin parpadeo negro largo | |
 | 6 | Corte directo | Configuración › Transición › Corte directo | Cambio instantáneo | |
-| 7 | Aleatorio sin repetición inmediata | Pulsar «siguiente» 10 veces | Nunca la misma foto dos veces seguidas | |
+| 7 | Aleatorio sin repetición inmediata | Intervalo de 10 s; observar 10 cambios | Nunca la misma foto dos veces seguidas | |
 | 8 | Orden por nombre | Orden › Cronológico | foto-01 → 02 → 03 → 04 → 05 → 01 | |
 | 9 | Tamaños distintos | Recorrer las 5 fotos (horizontal, vertical, 4032×3024, pequeña, PNG) | Todas se ven completas y nítidas; la grande no tarda en exceso | |
 | 10 | Ajuste «Llenar la pantalla» | Ajuste de la foto › Llenar | Sin bordes negros; la foto vertical se recorta | |
 | 11 | Controles | Tocar la pantalla; esperar 5 s | Aparecen y se ocultan solos; un segundo toque los oculta | |
-| 12 | Pausa | Pausar y esperar 2 intervalos; reanudar | No cambia en pausa; continúa al reanudar | |
+| 12 | Pausa de fotos | Tocar «❚❚ Fotos», esperar 2 intervalos y tocar «▶ Fotos» | El botón cambia de icono y color; no cambia en pausa; continúa al reanudar | |
 | 13 | Reloj: formato, tamaño, posición, fecha | Cambiar cada opción | Se aplica al instante | |
 | 14 | Modo nocturno | Modo visual › Nocturno | Foto atenuada, reloj legible | |
 | 15 | Persistencia | Cambiar opciones, cerrar la pestaña, volver a abrir | Se conservan | |
@@ -43,17 +43,18 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 22 | Sin conexión | Activar modo avión | Aparece «Sin conexión»; reloj y fotos ya cargadas siguen | |
 | 23 | Pantalla de inicio | Compartir › Añadir a pantalla de inicio; abrir desde el icono | Sin barras de Safari; anotar si conserva las preferencias de la pestaña | |
 | 24 | Uso prolongado | Dejarla abierta 4 h o más con intervalo de 10 s | Sigue cambiando fotos y la hora es correcta; el diagnóstico muestra «Sigue activa: N min» cada 15 min | |
-| 25 | Radio: abrir | Tocar la pantalla › ♪ Radio | Lista de 13 estaciones; dice «Apagada»; no suena nada | |
+| 25 | Radio: abrir | Tocar la pantalla › ♪ Estaciones | Lista de 14 estaciones; dice «Apagada»; no suena nada | |
 | 26 | Radio: escuchar | Tocar una estación | Suena en pocos segundos; dice «Sonando» | |
 | 27 | Radio: todas | Tocar cada estación una por una | Las 14 suenan (anotar las que no) | |
 | 28 | Radio: detener | Tocar ■ | Se detiene; desaparece el aviso de la radio en los controles | |
 | 29 | Radio: volumen | Botones de volumen del iPad | Cambia el volumen; la app no muestra control de volumen | |
 | 30 | Radio y bloqueo | Con la radio sonando, bloquear 1 min y desbloquear | Anotar si siguió sonando o pide «Toca ▶» | |
 | 31 | Radio sin conexión | Con la radio sonando, activar modo avión 20 s | Pasa a «Reconectando…» y luego a error; al quitar el modo avión, tocar ▶ vuelve a sonar | |
-| 33 | Escanear | ♪ Radio › Escanear | Cambia de estación cada ~5 s de sonido, sin tocar nada; tras Beethoven vuelve a Corazón | |
-| 34 | Escanear y quedarse | Durante el escaneo, tocar la foto | Se queda en la estación que sonaba; al abrir ♪ Radio está marcada | |
+| 33 | Escanear | ♪ Estaciones › Escanear | Cambia de estación cada ~5 s de sonido, sin tocar nada y **sin silencio entre estaciones**; tras Beethoven vuelve a Corazón | |
+| 34 | Escanear y quedarse | Durante el escaneo, tocar la foto | Se queda en la estación que sonaba; al abrir ♪ Estaciones está marcada | |
 | 35 | Escanear con Listo | Escanear y tocar Listo | Vuelve a las fotos y sigue escaneando | |
 | 32 | Radio tras recargar | Recargar la página | No suena sola; recuerda la última estación elegida | |
+| 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 
 ## Cómo registrar un fallo
 

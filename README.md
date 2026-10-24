@@ -22,11 +22,12 @@ Una fase solo se da por terminada después de probarla en el iPad real
 ## Uso en el iPad
 
 1. Abre la URL en Safari.
-2. Toca la pantalla para mostrar u ocultar los controles (anterior, pausa,
-   siguiente, configuración). Se ocultan solos a los 5 segundos.
-3. En **♪ Radio** eliges una estación; suena al tocarla. **Escanear** pasa
-   por todas, 5 segundos cada una; toca cualquier cosa para quedarte en la
-   que suena. El volumen se ajusta con los botones del iPad.
+2. Toca la pantalla para mostrar u ocultar los controles. Se ocultan solos a
+   los 5 segundos. **Fotos** y **Radio** son botones de reproducir y pausar
+   (azules mientras avanzan o suenan).
+3. En **♪ Estaciones** eliges una estación; suena al tocarla. **Escanear**
+   pasa por todas, 5 segundos cada una y sin silencios entre ellas; toca
+   cualquier cosa para quedarte en la que suena. El volumen se ajusta con los botones del iPad.
 4. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, el reloj, la fecha y el modo nocturno.
 5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
