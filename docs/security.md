@@ -33,6 +33,11 @@
   código de autorización se quita de la dirección al volver de Dropbox.
 - El `state` se comprueba al volver, para rechazar respuestas que no inició
   este marco.
+- Con «Conectar con el teléfono», el código que muestra Dropbox solo se puede
+  canjear con el verificador PKCE que guarda el iPad, una sola vez y por pocos
+  minutos. Ver o fotografiar el código no da acceso.
+- Única biblioteca externa: `assets/js/vendor/qrcode.js` (qrcode-generator
+  1.4.4, MIT), copiada sin cambios; solo dibuja el QR y no hace conexiones.
 
 ### Riesgo aceptado: token de renovación en `localStorage`
 

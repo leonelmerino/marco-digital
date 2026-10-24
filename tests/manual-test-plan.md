@@ -54,7 +54,7 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 34 | Escanear y quedarse | Durante el escaneo, tocar la foto | Se queda en la estación que sonaba; al abrir ♪ Estaciones está marcada | |
 | 35 | Escanear con Listo | Escanear y tocar Listo | Vuelve a las fotos y sigue escaneando | |
 | 32 | Radio tras recargar | Recargar la página | No suena sola; recuerda la última estación elegida | |
-| 37 | Dropbox: conectar | En la dirección publicada: Configuración › Conectar con Dropbox; iniciar sesión; permitir | Vuelve al marco y abre «Elegir carpeta»; la dirección no muestra `code=` | |
+| 37 | Dropbox: conectar con el teléfono | Configuración › Conectar con el teléfono (QR); escanear con el iPhone; iniciar sesión y permitir; escribir el código en el iPad | Se abre «Elegir carpeta» | |
 | 38 | Dropbox: elegir carpeta | Navegar hasta la carpeta de fotos › Usar esta carpeta | Aparecen fotos de esa carpeta; Configuración muestra el número de fotos | |
 | 39 | Dropbox: carpeta grande | Usar la carpeta de 10 años | La primera foto sale en pocos segundos; el número sube hasta el total; anotar cuánto tarda la lista completa | |
 | 40 | Dropbox: HEIC | Incluir fotos .heic del iPhone | Anotar si se ven o si el diagnóstico muestra fallos de miniatura | |

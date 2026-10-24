@@ -18,6 +18,7 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `sample-photos.js` | `Frame.samplePhotos` | Fotos de prueba, cuando no hay Dropbox conectado. |
 | `radio/stations.js` | `Frame.radioStations` | Estaciones predefinidas y sus URLs. Se carga antes de `settings.js`. |
 | `radio/radio-player.js` | `Frame.radio` | Dos `<audio>`: conectar, reintentar, URLs de respaldo, escaneo sin silencios, estados. |
+| `vendor/qrcode.js` | `qrcode` | Biblioteca externa (MIT) para dibujar el QR de inicio de sesión. |
 | `dropbox/config.js` | `Frame.dropboxConfig` | App key pública. |
 | `dropbox/auth.js` | `Frame.dropboxAuth` | OAuth 2.0 + PKCE, renovación del token, carpeta elegida. |
 | `dropbox/api.js` | `Frame.dropboxApi` | Llamadas a la API (JSON) y miniaturas (Blob), con renovación y espera. |

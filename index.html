@@ -154,6 +154,7 @@
           <div id="dropbox-status" class="diag-summary"></div>
           <div class="row-buttons">
             <button type="button" id="btn-dropbox-connect">Conectar con Dropbox</button>
+            <button type="button" id="btn-dropbox-qr" class="hidden">Conectar con el teléfono (QR)</button>
             <button type="button" id="btn-dropbox-folder" class="hidden">Elegir carpeta</button>
             <button type="button" id="btn-dropbox-refresh" class="hidden">Buscar fotos nuevas</button>
             <button type="button" id="btn-dropbox-disconnect" class="hidden">Desconectar</button>
@@ -178,6 +179,29 @@
           </div>
         </section>
       </form>
+    </div>
+  </div>
+
+  <!-- Inicio de sesión de Dropbox desde otro aparato (Safari 12 ya no puede) -->
+  <div id="qr-sheet" class="settings hidden" role="dialog" aria-labelledby="qr-title">
+    <div class="settings-panel">
+      <div class="settings-head">
+        <h1 id="qr-title">Conectar con el teléfono</h1>
+        <button type="button" id="btn-qr-cancel" class="btn-plain">Cancelar</button>
+      </div>
+      <ol class="steps">
+        <li>Escanea este código con la cámara del teléfono.</li>
+        <li>Inicia sesión en Dropbox y toca <b>Permitir</b>.</li>
+        <li>Escribe aquí el código que muestra Dropbox (distingue mayúsculas y minúsculas).</li>
+      </ol>
+      <div class="qr-box"><img id="qr-image" class="qr-image" alt="Código QR para conectar Dropbox"></div>
+      <input type="text" id="qr-code" class="qr-code" autocomplete="off" autocorrect="off"
+        autocapitalize="off" spellcheck="false" placeholder="Código de Dropbox">
+      <div class="row-buttons">
+        <button type="button" id="btn-qr-submit" class="btn-primary">Conectar</button>
+        <button type="button" id="btn-qr-new">Nuevo código QR</button>
+      </div>
+      <div id="qr-status" class="diag-summary"></div>
     </div>
   </div>
 
@@ -209,6 +233,7 @@
   <script src="assets/js/slideshow.js"></script>
   <script src="assets/js/sample-photos.js"></script>
   <script src="assets/js/radio/radio-player.js"></script>
+  <script src="assets/js/vendor/qrcode.js"></script>
   <script src="assets/js/dropbox/config.js"></script>
   <script src="assets/js/dropbox/auth.js"></script>
   <script src="assets/js/dropbox/api.js"></script>

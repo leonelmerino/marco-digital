@@ -246,10 +246,8 @@
     var isError = false;
     if (!connected) {
       isError = lostConnection;
-      text = Frame.dropboxAuth.canConnectHere()
-        ? (lostConnection ? 'Dropbox pidió volver a conectar. ' : 'No conectado. ') + 'Se muestran fotos de prueba.'
-        : 'Dropbox solo permite conectar desde la dirección publicada: ' +
-          'https://leonelmerino.github.io/marco-digital/';
+      text = (lostConnection ? 'Dropbox pidió volver a conectar. ' : 'No conectado. ') + 'Se muestran fotos de prueba.';
+      if (oldSafari()) text += ' Este Safari ya no puede abrir el inicio de sesión de Dropbox: conecta con el teléfono.';
     } else if (!folder) {
       text = 'Conectado. Elige la carpeta de fotos.';
     } else {
@@ -258,17 +256,82 @@
     }
     $('dropbox-status').textContent = text;
     $('dropbox-status').className = isError ? 'diag-summary error' : 'diag-summary';
-    show('btn-dropbox-connect', !connected);
-    $('btn-dropbox-connect').disabled = !Frame.dropboxAuth.canConnectHere();
+    show('btn-dropbox-connect', !connected && Frame.dropboxAuth.canConnectHere() && !oldSafari());
+    show('btn-dropbox-qr', !connected && Frame.dropboxAuth.canUseCrypto());
     show('btn-dropbox-folder', connected);
     show('btn-dropbox-refresh', !!folder);
     show('btn-dropbox-disconnect', connected);
     show('dropbox-recursive-row', !!folder);
   }
 
+  // Dropbox exige un navegador más nuevo que Safari 12 para iniciar sesión.
+  function oldSafari() {
+    var ios = Frame.compat.features.ios;
+    return !!ios && parseInt(ios, 10) < 13;
+  }
+
   function dropboxError(message) {
     $('dropbox-status').textContent = message;
     $('dropbox-status').className = 'diag-summary error';
+  }
+
+  // ---- Conectar con el teléfono (QR) ----
+
+  function qrStatus(text, isError) {
+    $('qr-status').textContent = text;
+    $('qr-status').className = isError ? 'diag-summary error' : 'diag-summary';
+  }
+
+  function newQr() {
+    $('qr-image').removeAttribute('src');
+    $('qr-code').value = '';
+    qrStatus('Preparando código…', false);
+    Frame.dropboxAuth.startCodeLogin().then(function (url) {
+      var qr = global.qrcode(0, 'L');
+      qr.addData(url);
+      qr.make();
+      $('qr-image').src = qr.createDataURL(6, 4);
+      qrStatus('', false);
+    }, function (err) {
+      qrStatus('No se pudo preparar el código: ' + err.message, true);
+    });
+  }
+
+  function openQr() {
+    $('qr-sheet').className = 'settings';
+    newQr();
+  }
+
+  function closeQr() {
+    $('qr-code').blur();
+    $('qr-sheet').className = 'settings hidden';
+  }
+
+  function submitQrCode() {
+    var button = $('btn-qr-submit');
+    button.disabled = true;
+    qrStatus('Conectando…', false);
+    Frame.dropboxAuth.finishCodeLogin($('qr-code').value).then(function () {
+      button.disabled = false;
+      lostConnection = false;
+      closeQr();
+      updateDropboxUI();
+      openPicker();
+    }, function (err) {
+      button.disabled = false;
+      qrStatus(err.message + '.', true);
+      if (/venció/.test(err.message)) newQr();
+    });
+  }
+
+  function bindQr() {
+    $('btn-dropbox-qr').addEventListener('click', openQr);
+    $('btn-qr-cancel').addEventListener('click', closeQr);
+    $('btn-qr-new').addEventListener('click', newQr);
+    $('btn-qr-submit').addEventListener('click', submitQrCode);
+    $('qr-code').addEventListener('keydown', function (event) {
+      if (event.keyCode === 13) submitQrCode();
+    });
   }
 
   // ---- Explorador de carpetas ----
@@ -344,6 +407,7 @@
       startPhotos();
     });
     $('btn-folder-cancel').addEventListener('click', closePicker);
+    bindQr();
   }
 
   // Al volver de dropbox.com con ?code=…: completar el inicio de sesión.

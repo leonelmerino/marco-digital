@@ -28,8 +28,9 @@ Una fase solo se da por terminada después de probarla en el iPad real
 3. En **♪ Estaciones** eliges una estación; suena al tocarla. **Escanear**
    pasa por todas, 5 segundos cada una y sin silencios entre ellas; toca
    cualquier cosa para quedarte en la que suena. El volumen se ajusta con los botones del iPad.
-4. En **Configuración › Dropbox** conectas tu cuenta y eliges la carpeta de
-   fotos (desde la dirección publicada, no desde la red local).
+4. En **Configuración › Dropbox** conectas tu cuenta con **Conectar con el
+   teléfono (QR)**: escaneas el código con el iPhone, inicias sesión allí y
+   escribes en el iPad el código que muestra Dropbox. Luego eliges la carpeta.
 5. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, el reloj, la fecha y el modo nocturno.
 5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›

@@ -33,7 +33,8 @@ con cada prueba en el dispositivo.
 | `localStorage` desde la pantalla de inicio | Pendiente | |
 | `visibilitychange` al bloquear y desbloquear | Sí (23-10-2026) | Bloqueo de ~3 min; hora correcta al volver |
 | `crypto.subtle` (necesario para PKCE en la fase 3) | Detectado (23-10-2026) | `digest('SHA-256')` se prueba al conectar Dropbox |
-| Dropbox: inicio de sesión y vuelta al marco | Pendiente | En pestaña de Safari y desde la pantalla de inicio |
+| Dropbox: página de inicio de sesión en Safari 12 | No (24-10-2026) | Dropbox pide actualizar el navegador; se usa el inicio de sesión con el teléfono (QR) |
+| Dropbox: conectar con el teléfono (QR) | Pendiente | |
 | Dropbox: miniaturas con `fetch` + `blob:` | Pendiente | |
 | Cambio de orientación | Sí (23-10-2026) | |
 | Radio: estaciones suenan | En parte (24-10-2026) | Además: Imagina, Activa, Pudahuel, Carolina, Cooperativa, FMDOS (al escanear); faltan Rock & Pop, ADN, Agricultura y Beethoven |

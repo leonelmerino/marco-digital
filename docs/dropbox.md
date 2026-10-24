@@ -14,6 +14,24 @@
    JPEG, modo `bestfit`): unos 300 KB aunque el original pese 10 MB. Nunca se
    descarga el archivo original.
 
+### Conectar con el teléfono (iPad con Safari 12)
+
+La página de inicio de sesión de Dropbox exige un navegador más nuevo que
+Safari 12 («actualiza tu navegador»). En ese caso el marco oculta «Conectar con
+Dropbox» y ofrece **Conectar con el teléfono (QR)**:
+
+1. El iPad genera el verificador PKCE, lo guarda (30 min) y muestra como QR una
+   dirección de autorización **sin** `redirect_uri`.
+2. En el teléfono se abre esa dirección, se inicia sesión y se toca Permitir.
+   Al no haber dirección de retorno, Dropbox muestra un código de un solo uso.
+3. Se escribe el código en el iPad, que lo cambia por los tokens usando el
+   verificador. El código no sirve en ningún otro aparato.
+
+No necesita una dirección de retorno registrada, así que también funciona
+desde la red local (`http://192.168.x.x:8010`). El QR lo dibuja
+`assets/js/vendor/qrcode.js` (qrcode-generator 1.4.4, MIT, copia sin
+modificar del paquete de npm con su integridad verificada).
+
 ## Carpetas grandes
 
 - La lista llega en páginas de 2000 entradas. Cada página se procesa y se
@@ -69,4 +87,7 @@ propia conexión.
 - Con Dropbox real: la página de autorización acepta la App key y la dirección
   `http://localhost:8010/` («link with Marco digital Leonel»); un token de
   renovación inválido se rechaza y el marco vuelve a las fotos de prueba.
+- QR: se lee correctamente (comprobado con el lector de códigos de Chrome) y
+  Dropbox acepta la dirección sin retorno; un código inventado se rechaza con
+  un mensaje claro.
 - **Pendiente:** inicio de sesión real, carpeta real, HEIC, iPad.

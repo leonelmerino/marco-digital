@@ -8,6 +8,13 @@
  *    el código de la dirección.
  * 3. getAccessToken() renueva el token de acceso cuando hace falta.
  *
+ * Inicio de sesión con otro aparato (Safari 12 ya no puede usar la página de
+ * inicio de sesión de Dropbox): startCodeLogin() prepara una dirección de
+ * autorización sin dirección de retorno, que el iPad muestra como QR. Se abre
+ * en el teléfono, Dropbox muestra allí un código de un solo uso y
+ * finishCodeLogin(código) lo cambia por los tokens con el verificador que
+ * quedó en el iPad. El código no sirve sin ese verificador.
+ *
  * Seguridad:
  * - El token de acceso solo vive en memoria. El de renovación se guarda en
  *   localStorage porque no hay otro sitio que sobreviva a una recarga; da
@@ -99,13 +106,64 @@
     else Frame.storage.remove(ACCOUNT_KEY);
   }
 
+  function saveTokens(data) {
+    if (!data.refresh_token) throw new Error('Dropbox no entregó token de renovación');
+    account = { refreshToken: data.refresh_token, folder: account ? account.folder : null };
+    saveAccount();
+    log('conectado');
+    return true;
+  }
+
   // ---- API pública ----
+
+  function canUseCrypto() {
+    return !!(global.crypto && global.crypto.subtle && global.crypto.getRandomValues);
+  }
+
+  // Devuelve la promesa de la dirección para el QR. Sin redirect_uri, Dropbox
+  // muestra el código en pantalla en vez de volver a esta página.
+  function startCodeLogin() {
+    if (!canUseCrypto()) return Promise.reject(new Error('Este navegador no tiene crypto.subtle'));
+    var verifier = randomString(48);
+    return sha256(verifier).then(function (challenge) {
+      Frame.storage.write(PENDING_KEY, { verifier: verifier, state: null, at: Date.now(), mode: 'code' });
+      return AUTHORIZE_URL + '?' + form({
+        client_id: Frame.dropboxConfig.appKey,
+        response_type: 'code',
+        code_challenge: challenge,
+        code_challenge_method: 'S256',
+        token_access_type: 'offline'
+      });
+    });
+  }
+
+  function finishCodeLogin(code) {
+    var pending = Frame.storage.read(PENDING_KEY);
+    code = String(code || '').replace(/\s+/g, '');
+    if (!pending || pending.mode !== 'code' || Date.now() - pending.at > PENDING_MAX_MS) {
+      return Promise.reject(new Error('El código QR venció; se generó uno nuevo'));
+    }
+    if (!code) return Promise.reject(new Error('Escribe el código que muestra Dropbox'));
+    return tokenRequest({
+      code: code,
+      grant_type: 'authorization_code',
+      code_verifier: pending.verifier,
+      client_id: Frame.dropboxConfig.appKey
+    }).then(function (data) {
+      Frame.storage.remove(PENDING_KEY);
+      return saveTokens(data);
+    }, function (err) {
+      log('código no aceptado (' + err.code + ')', true);
+      if (err.code === 'invalid_grant') {
+        throw new Error('Dropbox no aceptó el código. Revisa mayúsculas y minúsculas o escanea el QR de nuevo');
+      }
+      throw new Error('No se pudo conectar (' + err.message + ')');
+    });
+  }
 
   function connect() {
     if (!canConnectHere()) return Promise.reject(new Error('Dirección no admitida por Dropbox'));
-    if (!global.crypto || !global.crypto.subtle || !global.crypto.getRandomValues) {
-      return Promise.reject(new Error('Este navegador no tiene crypto.subtle'));
-    }
+    if (!canUseCrypto()) return Promise.reject(new Error('Este navegador no tiene crypto.subtle'));
     var verifier = randomString(48); // 64 caracteres
     var state = randomString(16);
     return sha256(verifier).then(function (challenge) {
@@ -154,13 +212,7 @@
       code_verifier: pending.verifier,
       client_id: Frame.dropboxConfig.appKey,
       redirect_uri: redirectUri()
-    }).then(function (data) {
-      if (!data.refresh_token) throw new Error('Dropbox no entregó token de renovación');
-      account = { refreshToken: data.refresh_token, folder: account ? account.folder : null };
-      saveAccount();
-      log('conectado');
-      return true;
-    }, function (err) {
+    }).then(saveTokens, function (err) {
       log('no se pudo completar el inicio de sesión (' + err.code + ')', true);
       throw err;
     });
@@ -219,6 +271,9 @@
       account = stored && typeof stored.refreshToken === 'string' ? stored : null;
     },
     canConnectHere: canConnectHere,
+    canUseCrypto: canUseCrypto,
+    startCodeLogin: startCodeLogin,
+    finishCodeLogin: finishCodeLogin,
     isConnected: function () { return !!account; },
     connect: connect,
     handleRedirect: handleRedirect,
