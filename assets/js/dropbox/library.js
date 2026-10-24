@@ -201,8 +201,9 @@
     });
   }
 
-  // Cargador para la presentación: devuelve una URL blob: de la miniatura.
-  function load(photo, callback) {
+  // Cargador para la presentación: devuelve una URL blob: de la miniatura
+  // (más pequeña con `small`).
+  function load(photo, callback, small) {
     var done = false;
     var timer = setTimeout(function () {
       if (done) return;
@@ -210,7 +211,7 @@
       callback(new Error('tiempo agotado'));
     }, THUMB_TIMEOUT_MS);
     Promise.all([
-      Frame.dropboxApi.thumbnail(photo.path),
+      Frame.dropboxApi.thumbnail(photo.path, small),
       fetchInfo(photo)
     ]).then(function (results) {
       var blob = results[0];

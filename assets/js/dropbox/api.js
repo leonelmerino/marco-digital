@@ -71,12 +71,13 @@
 
   // Formato JPEG y el tamaño mayor que ofrece Dropbox (2048×1536), justo la
   // pantalla del iPad Air. `bestfit` admite también 1536×2048 para las fotos
-  // verticales, sin recortar.
-  function thumbnail(path) {
+  // verticales, sin recortar. Con `small`, 1024×768: para las fotos que
+  // ocupan media pantalla o un cuarto en una vista de varias fotos.
+  function thumbnail(path, small) {
     var arg = headerJson({
       resource: { '.tag': 'path', path: path },
       format: 'jpeg',
-      size: 'w2048h1536',
+      size: small ? 'w1024h768' : 'w2048h1536',
       mode: 'bestfit'
     });
     return call(function (token) {

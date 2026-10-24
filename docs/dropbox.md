@@ -131,4 +131,9 @@ subir `?v=` de `DATA_URL` en `geo.js`.
   Torres del Paine → «Chile» (la ciudad más cercana está en Argentina), punto
   en el mar → nada, foto sin datos → solo la fecha del archivo. 40 000
   búsquedas de ciudad en 0,15 s en el Mac.
-- **Pendiente:** HEIC, lugar y fecha en el iPad.
+- En el iPad: lugar y fecha correctos con fotos reales.
+- Grilla, con Dropbox simulado (12 fotos verticales y horizontales en orden
+  cronológico): V+V, H, V+H+H, V+V (la H intermedia pasa después), H, H, V+V,
+  como se esperaba. Con 42 000 fotos llegando por páginas y miniaturas de
+  2,5 s, la primera vista sale a los 4 s y no se repiten descargas.
+- **Pendiente:** HEIC, grilla en el iPad.

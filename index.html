@@ -10,17 +10,14 @@
   <meta name="theme-color" content="#000000">
   <title>Marco digital</title>
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="assets/css/styles.css?v=5">
+  <link rel="stylesheet" href="assets/css/styles.css?v=6">
 </head>
 <body class="controls-visible">
-  <!-- Modo marco: dos capas de imagen para el fundido -->
+  <!-- Modo marco: dos capas para el fundido, cada una con una a tres fotos -->
   <div id="stage" class="stage" aria-label="Presentación de fotografías">
-    <img id="layer-a" class="layer" alt="">
-    <img id="layer-b" class="layer" alt="">
-    <div id="captions" class="captions">
-      <div id="caption-a" class="caption"></div>
-      <div id="caption-b" class="caption"></div>
-    </div>
+    <!-- Cada capa tiene tres celdas (foto + leyenda); las crea slideshow.js -->
+    <div id="layer-a" class="layer"></div>
+    <div id="layer-b" class="layer"></div>
     <div id="dimmer" class="dimmer"></div>
     <div id="empty" class="empty hidden">No hay fotografías para mostrar.</div>
   </div>
@@ -105,6 +102,7 @@
               <option value="none">Corte directo</option>
             </select>
           </label>
+          <label class="row">Agrupar fotos verticales <input type="checkbox" name="grid"></label>
           <label class="row">Mostrar lugar y fecha <input type="checkbox" name="photoInfo"></label>
           <label class="row">Ajuste de la foto
             <select name="fit">
@@ -232,21 +230,21 @@
   <!-- Scripts clásicos (sin módulos ni compilación) para Safari de iOS 12.
        ?v=N: subirlo en cada publicación para que el iPad no mezcle archivos
        nuevos con otros guardados en caché. -->
-  <script src="assets/js/compatibility.js?v=5"></script>
-  <script src="assets/js/storage.js?v=5"></script>
-  <script src="assets/js/radio/stations.js?v=5"></script>
-  <script src="assets/js/settings.js?v=5"></script>
-  <script src="assets/js/clock.js?v=5"></script>
-  <script src="assets/js/slideshow.js?v=5"></script>
-  <script src="assets/js/geo.js?v=5"></script>
-  <script src="assets/js/photo-info.js?v=5"></script>
-  <script src="assets/js/sample-photos.js?v=5"></script>
-  <script src="assets/js/radio/radio-player.js?v=5"></script>
-  <script src="assets/js/vendor/qrcode.js?v=5"></script>
-  <script src="assets/js/dropbox/config.js?v=5"></script>
-  <script src="assets/js/dropbox/auth.js?v=5"></script>
-  <script src="assets/js/dropbox/api.js?v=5"></script>
-  <script src="assets/js/dropbox/library.js?v=5"></script>
-  <script src="assets/js/app.js?v=5"></script>
+  <script src="assets/js/compatibility.js?v=6"></script>
+  <script src="assets/js/storage.js?v=6"></script>
+  <script src="assets/js/radio/stations.js?v=6"></script>
+  <script src="assets/js/settings.js?v=6"></script>
+  <script src="assets/js/clock.js?v=6"></script>
+  <script src="assets/js/slideshow.js?v=6"></script>
+  <script src="assets/js/geo.js?v=6"></script>
+  <script src="assets/js/photo-info.js?v=6"></script>
+  <script src="assets/js/sample-photos.js?v=6"></script>
+  <script src="assets/js/radio/radio-player.js?v=6"></script>
+  <script src="assets/js/vendor/qrcode.js?v=6"></script>
+  <script src="assets/js/dropbox/config.js?v=6"></script>
+  <script src="assets/js/dropbox/auth.js?v=6"></script>
+  <script src="assets/js/dropbox/api.js?v=6"></script>
+  <script src="assets/js/dropbox/library.js?v=6"></script>
+  <script src="assets/js/app.js?v=6"></script>
 </body>
 </html>

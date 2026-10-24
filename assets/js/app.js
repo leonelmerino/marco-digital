@@ -497,6 +497,8 @@
     global.addEventListener('online', function () { Frame.compat.log('En línea'); updateConnectivity(); });
     global.addEventListener('offline', function () { Frame.compat.log('Sin conexión', true); updateConnectivity(); });
     global.addEventListener('orientationchange', function () { Frame.compat.log('Cambio de orientación'); });
+    // Las vistas de varias fotos se colocan según la orientación de la pantalla.
+    global.addEventListener('resize', function () { Frame.slideshow.relayout(); });
 
     // Latido para las pruebas prolongadas: deja constancia en el diagnóstico.
     setInterval(function () {

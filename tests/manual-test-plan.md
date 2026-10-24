@@ -65,6 +65,9 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 45 | Lugar y fecha | Con Dropbox conectado, mirar varias fotos | Abajo a la izquierda, en pequeño: ciudad y país (si la foto tiene GPS) y la fecha con «hace N años»; aparece y se va con la foto | |
 | 46 | Lugar y fecha: ocultar | Configuración › Mostrar lugar y fecha: desactivar | Desaparece; al activarlo vuelve | |
 | 47 | Lugar y fecha con controles | Tocar la pantalla | La leyenda se oculta mientras están los controles | |
+| 48 | Fotos verticales | Con Dropbox conectado, esperar varias vistas | Las verticales salen de a dos, lado a lado, o una vertical con dos horizontales apiladas; cada foto con su lugar y fecha | |
+| 49 | Grilla: desactivar | Configuración › Agrupar fotos verticales: desactivar | Desde la vista siguiente, cada foto sale sola | |
+| 50 | Grilla y memoria | Dejar el marco 1 h con la grilla activa | No se recarga sola ni queda en negro | |
 | 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 
 ## Cómo registrar un fallo

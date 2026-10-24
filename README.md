@@ -13,7 +13,9 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | 1 | Reloj, fotos de prueba, fundido, controles, configuración | Validada en el iPad (falta la prueba de varias horas) |
 | 2 | Publicación en GitHub Pages | Publicada; pendiente de validar en el iPad |
 | 3 | Fotos desde una carpeta de Dropbox (OAuth 2.0 + PKCE), también carpetas muy grandes | Conexión y carpeta de 41 000 fotos probadas en el iPad |
-| 3b | Lugar y fecha sobre cada foto (ciudad y país sin conexión) | Implementada; pendiente de probar en el iPad |
+| 3b | Lugar y fecha sobre cada foto (ciudad y país sin conexión) | Validada en el iPad |
+| 3c | Fotos verticales agrupadas en vistas de dos o tres fotos | Implementada; pendiente de probar en el iPad |
+| 3d | Filtro por ciudad | Sin empezar |
 | 4 | Radio por internet: 14 estaciones chilenas predefinidas y función Escanear (sustituye a Internet Archive) | Implementada; validada en parte en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
@@ -33,8 +35,8 @@ Una fase solo se da por terminada después de probarla en el iPad real
    teléfono (QR)**: escaneas el código con el iPhone, inicias sesión allí y
    escribes en el iPad el código que muestra Dropbox. Luego eliges la carpeta.
 5. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
-   el ajuste de la foto, el lugar y la fecha de cada foto, el reloj, la
-   fecha y el modo nocturno.
+   el ajuste de la foto, si se agrupan las fotos verticales, el lugar y la
+   fecha de cada foto, el reloj, la fecha y el modo nocturno.
 5. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
    Bloqueo automático › Nunca**. Para que nadie salga de Safari, puedes usar
    **Acceso Guiado** (Ajustes › Accesibilidad).

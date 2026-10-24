@@ -37,15 +37,28 @@ La radio sustituye a la carpeta `music/` prevista en la especificación (ver `do
 cambio de segundo. Los temporizadores solo despiertan; nunca miden el tiempo.
 Al volver a primer plano (`visibilitychange`, `pageshow`) se repinta al instante.
 
-**Presentación con dos capas.** Hay dos `<img>` fijos: el visible y el oculto.
-Para cambiar de foto se carga la siguiente en la capa oculta y se intercambian
-las clases; el fundido es una transición CSS de `opacity`. Tras el fundido, la
-capa oculta precarga la foto siguiente. No se crea un objeto `Image` por foto:
-como máximo hay dos imágenes decodificadas en memoria.
+**Presentación con dos capas.** Hay dos capas fijas: la visible y la oculta.
+Para cambiar de vista se prepara la siguiente en la capa oculta y se
+intercambian las clases; el fundido es una transición CSS de `opacity`. Tras
+el fundido, la capa oculta prepara la vista siguiente. No se crea un objeto
+`Image` por foto: cada capa tiene tres `<img>` fijos, así que como mucho hay
+seis imágenes decodificadas (las que acompañan a una vertical, a 1024×768).
+
+**Vistas de varias fotos.** Una foto que no llena la pantalla en su
+orientación (vertical con el iPad horizontal) se junta con la siguiente
+vertical, una al lado de la otra, o con las dos horizontales siguientes
+apiladas a su lado. Si tras la vertical viene una horizontal y luego otra
+vertical, se juntan las dos verticales y la horizontal pasa a la vista
+siguiente (se intercambian en el orden). La orientación se lee de la
+miniatura ya cargada, así que la vista se arma foto a foto: la primera a
+tamaño completo y, solo si es vertical, las siguientes en pequeño. Al girar el
+iPad las celdas se recolocan (en vertical, dos horizontales van una sobre la
+otra). Se desactiva en Configuración › Agrupar fotos verticales.
 
 **Un solo temporizador.** `slideshow.js` guarda un único `timer` y lo limpia
-antes de crear otro. El temporizador arranca cuando la foto ya está visible, así
-una descarga lenta no acorta el tiempo de exhibición.
+antes de crear otro. El temporizador arranca cuando la vista ya está visible,
+así una descarga lenta no acorta el tiempo de exhibición. Una vista de dos o
+tres fotos dura lo mismo que una foto sola.
 
 **Errores de imagen.** Si una foto falla, se registra y se pasa a la siguiente
 tras 400 ms. Si fallan todas, se muestra un aviso y se reintenta en el
