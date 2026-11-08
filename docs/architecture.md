@@ -16,7 +16,8 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `clock.js` | `Frame.clock` | Hora y fecha locales. |
 | `slideshow.js` | `Frame.slideshow` | Orden, temporizador, carga, fundido, precarga y leyenda de cada capa. |
 | `geo.js` | `Frame.geo` | Ciudad y país a partir de coordenadas, sin conexión. Carga `data/cities.js` tras el arranque. |
-| `photo-info.js` | `Frame.photoInfo` | Texto de la leyenda: lugar y «12 de marzo de 2016 · hace 8 años». |
+| `photo-info.js` | `Frame.photoInfo` | Texto de la leyenda: lugar y «12 de marzo de 2016 · hace 8 años»; fecha de una foto sin pedirla (índice o nombre del archivo). |
+| `composer.js` | `Frame.composer` | Elige las compañeras de una vertical por color (miniaturas de 64×64 en lote) y día del año. |
 | `data/cities.js` | `Frame.cityData` | Tabla generada (GeoNames + Natural Earth, ~1,4 MB; ~650 KB comprimida). No se edita a mano. |
 | `sample-photos.js` | `Frame.samplePhotos` | Fotos de prueba, cuando no hay Dropbox conectado. |
 | `radio/stations.js` | `Frame.radioStations` | Estaciones predefinidas y sus URLs. Se carga antes de `settings.js`. |
@@ -57,6 +58,24 @@ miniatura ya cargada, así que la vista se arma foto a foto: la primera a
 tamaño completo y, solo si es vertical, las siguientes en pequeño. Al girar el
 iPad las celdas se recolocan (en vertical, dos horizontales van una sobre la
 otra). Se desactiva en Configuración › Agrupar fotos verticales.
+
+**Composición.** Cuando la primera foto de una vista es vertical, el
+compositor mira las 12 siguientes del orden: pide en una sola llamada sus
+miniaturas de 64×64 (`get_thumbnail_batch`), saca de cada una la orientación y
+el color promedio (lienzo de 12×12) y la compara con la vertical por color
+(distancia «redmean», 60 %) y por día del año (40 %, sin importar el año).
+Gana la vertical más parecida (pareja) o las dos horizontales más parecidas
+(trío); las elegidas se adelantan en el orden. Si la llamada falla o tarda
+más de 6 s, se toman las siguientes como antes.
+
+**Orden que mezcla años.** El ciclo aleatorio elige en cada paso un año con
+peso proporcional a la raíz de su número de fotos y no repite año seguido:
+un año con 9 veces más fotos sale 3 veces más, no 9. El año sale del índice
+o del nombre del archivo; las fotos sin año forman su propio grupo.
+
+**Historial.** Se guardan las últimas 50 vistas mostradas. Deslizar hacia la
+derecha (o la flecha ← en el Mac) vuelve a ellas tal como eran; hacia la
+izquierda se avanza por las que se dejaron atrás y luego se sigue el orden.
 
 **Un solo temporizador.** `slideshow.js` guarda un único `timer` y lo limpia
 antes de crear otro. El temporizador arranca cuando la vista ya está visible,

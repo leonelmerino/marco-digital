@@ -16,6 +16,7 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | 3b | Lugar y fecha sobre cada foto (ciudad y país sin conexión) | Validada en el iPad |
 | 3c | Fotos verticales agrupadas en vistas de dos o tres fotos | Validada en el iPad |
 | 3d | Filtro por país y rango de años (índice en segundo plano) | Implementada; pendiente de probar en el iPad |
+| 3e | Varias carpetas, deslizar adelante/atrás, orden que mezcla años, grilla por color y fecha | Implementada; pendiente de probar en el iPad |
 | 4 | Radio por internet: 14 estaciones chilenas predefinidas y función Escanear (sustituye a Internet Archive) | Implementada; validada en parte en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
@@ -25,7 +26,9 @@ Una fase solo se da por terminada después de probarla en el iPad real
 ## Uso en el iPad
 
 1. Abre la URL en Safari.
-2. Toca la pantalla para mostrar u ocultar los controles. Se ocultan solos a
+2. Desliza el dedo sobre la foto hacia la izquierda para ver la siguiente y
+   hacia la derecha para volver a las anteriores (tal como eran).
+   Toca la pantalla para mostrar u ocultar los controles. Se ocultan solos a
    los 5 segundos. **Fotos** y **Radio** son botones de reproducir y pausar
    (azules mientras avanzan o suenan).
 3. En **♪ Estaciones** eliges una estación; suena al tocarla. **Escanear**
@@ -36,7 +39,8 @@ Una fase solo se da por terminada después de probarla en el iPad real
    horas para 40 000 fotos); las cifras crecen mientras tanto.
 5. En **Configuración › Dropbox** conectas tu cuenta con **Conectar con el
    teléfono (QR)**: escaneas el código con el iPhone, inicias sesión allí y
-   escribes en el iPad el código que muestra Dropbox. Luego eliges la carpeta.
+   escribes en el iPad el código que muestra Dropbox. Luego agregas una o
+   varias carpetas (**Agregar carpeta**; cada una se puede quitar).
 6. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, si se agrupan las fotos verticales, el lugar y la
    fecha de cada foto, el reloj, la fecha y el modo nocturno.

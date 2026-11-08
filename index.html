@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#000000">
   <title>Marco digital</title>
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="assets/css/styles.css?v=7">
+  <link rel="stylesheet" href="assets/css/styles.css?v=8">
 </head>
 <body class="controls-visible">
   <!-- Modo marco: dos capas para el fundido, cada una con una a tres fotos -->
@@ -194,10 +194,11 @@
         <section>
           <h2>Dropbox</h2>
           <div id="dropbox-status" class="diag-summary"></div>
+          <div id="dropbox-folders" class="sources"></div>
           <div class="row-buttons">
             <button type="button" id="btn-dropbox-connect">Conectar con Dropbox</button>
             <button type="button" id="btn-dropbox-qr" class="hidden">Conectar con el teléfono (QR)</button>
-            <button type="button" id="btn-dropbox-folder" class="hidden">Elegir carpeta</button>
+            <button type="button" id="btn-dropbox-folder" class="hidden">Agregar carpeta</button>
             <button type="button" id="btn-dropbox-refresh" class="hidden">Buscar fotos nuevas</button>
             <button type="button" id="btn-dropbox-disconnect" class="hidden">Desconectar</button>
           </div>
@@ -251,14 +252,14 @@
   <div id="folder-sheet" class="settings hidden" role="dialog" aria-labelledby="folder-title">
     <div class="settings-panel">
       <div class="settings-head">
-        <h1 id="folder-title">Elegir carpeta</h1>
+        <h1 id="folder-title">Agregar carpeta</h1>
         <button type="button" id="btn-folder-cancel" class="btn-plain">Cancelar</button>
       </div>
       <div id="folder-path" class="folder-path"></div>
       <div id="folder-info" class="note"></div>
       <div class="row-buttons">
         <button type="button" id="btn-folder-up">&lsaquo; Subir</button>
-        <button type="button" id="btn-folder-use" class="btn-primary">Usar esta carpeta</button>
+        <button type="button" id="btn-folder-use" class="btn-primary">Agregar esta carpeta</button>
       </div>
       <div id="folder-list" class="folder-list"></div>
     </div>
@@ -269,24 +270,25 @@
   <!-- Scripts clásicos (sin módulos ni compilación) para Safari de iOS 12.
        ?v=N: subirlo en cada publicación para que el iPad no mezcle archivos
        nuevos con otros guardados en caché. -->
-  <script src="assets/js/compatibility.js?v=7"></script>
-  <script src="assets/js/storage.js?v=7"></script>
-  <script src="assets/js/radio/stations.js?v=7"></script>
-  <script src="assets/js/settings.js?v=7"></script>
-  <script src="assets/js/clock.js?v=7"></script>
-  <script src="assets/js/slideshow.js?v=7"></script>
-  <script src="assets/js/geo.js?v=7"></script>
-  <script src="assets/js/photo-info.js?v=7"></script>
-  <script src="assets/js/sample-photos.js?v=7"></script>
-  <script src="assets/js/radio/radio-player.js?v=7"></script>
-  <script src="assets/js/vendor/qrcode.js?v=7"></script>
-  <script src="assets/js/dropbox/config.js?v=7"></script>
-  <script src="assets/js/dropbox/auth.js?v=7"></script>
-  <script src="assets/js/dropbox/api.js?v=7"></script>
-  <script src="assets/js/dropbox/library.js?v=7"></script>
-  <script src="assets/js/dropbox/photo-index.js?v=7"></script>
-  <script src="assets/js/photo-filter.js?v=7"></script>
-  <script src="assets/js/filter-ui.js?v=7"></script>
-  <script src="assets/js/app.js?v=7"></script>
+  <script src="assets/js/compatibility.js?v=8"></script>
+  <script src="assets/js/storage.js?v=8"></script>
+  <script src="assets/js/radio/stations.js?v=8"></script>
+  <script src="assets/js/settings.js?v=8"></script>
+  <script src="assets/js/clock.js?v=8"></script>
+  <script src="assets/js/slideshow.js?v=8"></script>
+  <script src="assets/js/geo.js?v=8"></script>
+  <script src="assets/js/photo-info.js?v=8"></script>
+  <script src="assets/js/composer.js?v=8"></script>
+  <script src="assets/js/sample-photos.js?v=8"></script>
+  <script src="assets/js/radio/radio-player.js?v=8"></script>
+  <script src="assets/js/vendor/qrcode.js?v=8"></script>
+  <script src="assets/js/dropbox/config.js?v=8"></script>
+  <script src="assets/js/dropbox/auth.js?v=8"></script>
+  <script src="assets/js/dropbox/api.js?v=8"></script>
+  <script src="assets/js/dropbox/library.js?v=8"></script>
+  <script src="assets/js/dropbox/photo-index.js?v=8"></script>
+  <script src="assets/js/photo-filter.js?v=8"></script>
+  <script src="assets/js/filter-ui.js?v=8"></script>
+  <script src="assets/js/app.js?v=8"></script>
 </body>
 </html>

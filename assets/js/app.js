@@ -61,10 +61,45 @@
     setToggle($('btn-play'), Frame.slideshow.isPlaying(), 'Fotos');
   }
 
+  // Deslizar el dedo sobre la foto: hacia la izquierda, la vista siguiente;
+  // hacia la derecha, la anterior. Un toque sin deslizar muestra los controles.
+  var SWIPE_MIN_PX = 60;
+  var SWIPE_MAX_MS = 800;
+  var swipeStart = null;
+  var swipedAt = 0;
+
+  function bindSwipe() {
+    var stage = $('stage');
+    stage.addEventListener('touchstart', function (event) {
+      var t = event.touches[0];
+      swipeStart = event.touches.length === 1 ? { x: t.clientX, y: t.clientY, at: Date.now() } : null;
+    });
+    stage.addEventListener('touchend', function (event) {
+      if (!swipeStart) return;
+      var t = event.changedTouches[0];
+      var dx = t.clientX - swipeStart.x;
+      var dy = t.clientY - swipeStart.y;
+      var quick = Date.now() - swipeStart.at < SWIPE_MAX_MS;
+      swipeStart = null;
+      if (!quick || Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+      swipedAt = Date.now();
+      if (dx < 0) Frame.slideshow.next();
+      else Frame.slideshow.prev();
+    });
+    // En el Mac, con las flechas del teclado.
+    document.addEventListener('keydown', function (event) {
+      if (event.target !== document.body) return;
+      if (event.keyCode === 39) Frame.slideshow.next();
+      else if (event.keyCode === 37) Frame.slideshow.prev();
+    });
+  }
+
   function bindControls() {
     $('stage').addEventListener('click', function () {
+      if (Date.now() - swipedAt < 600) return; // el toque final de un deslizamiento
       if (controlsVisible()) hideControls(); else showControls();
     });
+    bindSwipe();
     $('btn-play').addEventListener('click', function () {
       if (Frame.slideshow.isPlaying()) Frame.slideshow.pause(); else Frame.slideshow.play();
       updatePlayButton();
@@ -247,11 +282,15 @@
     }, lastFiltered === 0 ? 2000 : FILTER_REFRESH_MS);
   }
 
+  function hasFolders() {
+    return Frame.dropboxAuth.isConnected() && Frame.dropboxAuth.getFolders().length > 0;
+  }
+
   function startPhotos() {
-    var folder = Frame.dropboxAuth.isConnected() ? Frame.dropboxAuth.getFolder() : null;
+    var folders = Frame.dropboxAuth.isConnected() ? Frame.dropboxAuth.getFolders() : [];
     library = { text: '', error: false, count: 0 };
-    updateFilterButton(!!folder);
-    if (!folder) {
+    updateFilterButton(folders.length > 0);
+    if (!folders.length) {
       Frame.dropboxLibrary.stop();
       Frame.photoIndex.stop();
       Frame.slideshow.setPhotos(Frame.samplePhotos);
@@ -260,7 +299,7 @@
     }
     Frame.slideshow.setPhotos([], 'Buscando fotos en Dropbox…');
     Frame.photoIndex.start(Frame.dropboxLibrary.photos);
-    Frame.dropboxLibrary.start(folder, Frame.settings.get().dropboxRecursive, {
+    Frame.dropboxLibrary.start(folders, Frame.settings.get().dropboxRecursive, {
       onUpdate: function (list) {
         library.count = list.length;
         showLibrary(false);
@@ -288,27 +327,39 @@
 
   function updateDropboxUI() {
     var connected = Frame.dropboxAuth.isConnected();
-    var folder = connected ? Frame.dropboxAuth.getFolder() : null;
+    var folders = connected ? Frame.dropboxAuth.getFolders() : [];
     var text;
     var isError = false;
     if (!connected) {
       isError = lostConnection;
       text = (lostConnection ? 'Dropbox pidió volver a conectar. ' : 'No conectado. ') + 'Se muestran fotos de prueba.';
       if (oldSafari()) text += ' Este Safari ya no puede abrir el inicio de sesión de Dropbox: conecta con el teléfono.';
-    } else if (!folder) {
-      text = 'Conectado. Elige la carpeta de fotos.';
+    } else if (!folders.length) {
+      text = 'Conectado. Agrega una carpeta de fotos.';
     } else {
-      text = 'Carpeta: ' + (folder.name || 'todo Dropbox') + (library.text ? ' · ' + library.text : '');
+      text = library.text || 'Buscando fotos…';
       isError = library.error;
     }
     $('dropbox-status').textContent = text;
     $('dropbox-status').className = isError ? 'diag-summary error' : 'diag-summary';
+    renderFolderList(folders);
     show('btn-dropbox-connect', !connected && Frame.dropboxAuth.canConnectHere() && !oldSafari());
     show('btn-dropbox-qr', !connected && Frame.dropboxAuth.canUseCrypto());
     show('btn-dropbox-folder', connected);
-    show('btn-dropbox-refresh', !!folder);
+    show('btn-dropbox-refresh', folders.length > 0);
     show('btn-dropbox-disconnect', connected);
-    show('dropbox-recursive-row', !!folder);
+    show('dropbox-recursive-row', folders.length > 0);
+  }
+
+  // Carpetas elegidas, cada una con «Quitar».
+  function renderFolderList(folders) {
+    var html = '';
+    for (var i = 0; i < folders.length; i++) {
+      html += '<div class="source"><span class="source-name">' + escapeHtml(folders[i].name || 'Todo Dropbox') +
+        '</span><button type="button" class="source-remove" data-path="' +
+        escapeHtml(folders[i].path).replace(/"/g, '&quot;') + '">Quitar</button></div>';
+    }
+    $('dropbox-folders').innerHTML = html;
   }
 
   // Dropbox exige un navegador más nuevo que Safari 12 para iniciar sesión.
@@ -414,10 +465,13 @@
 
   function parent(path) { return path.slice(0, path.lastIndexOf('/')); }
 
+  // Empieza junto a la última carpeta agregada (suelen estar cerca).
   function openPicker() {
-    var folder = Frame.dropboxAuth.getFolder();
+    var folders = Frame.dropboxAuth.getFolders();
+    var last = folders[folders.length - 1];
+    var start = last ? parent(last.path) : '';
     $('folder-sheet').className = 'settings';
-    browseTo(folder ? folder.path : '', folder ? folder.name : '');
+    browseTo(start, last ? parent(last.name) : '');
   }
 
   function closePicker() {
@@ -451,8 +505,14 @@
       browseTo(parent(picker.path), parent(picker.display));
     });
     $('btn-folder-use').addEventListener('click', function () {
-      Frame.dropboxAuth.setFolder({ path: picker.path, name: picker.display });
+      Frame.dropboxAuth.addFolder({ path: picker.path, name: picker.display });
       closePicker();
+      startPhotos();
+    });
+    $('dropbox-folders').addEventListener('click', function (event) {
+      var button = event.target.closest ? event.target.closest('.source-remove') : null;
+      if (!button) return;
+      Frame.dropboxAuth.removeFolder(button.getAttribute('data-path'));
       startPhotos();
     });
     $('btn-folder-cancel').addEventListener('click', closePicker);
@@ -463,7 +523,7 @@
   function finishDropboxLogin() {
     return Frame.dropboxAuth.handleRedirect().then(function (connected) {
       if (connected) lostConnection = false;
-      if (connected && !Frame.dropboxAuth.getFolder()) {
+      if (connected && !Frame.dropboxAuth.getFolders().length) {
         openSettings();
         openPicker();
       }
@@ -564,6 +624,8 @@
     Frame.clock.init(settings);
     Frame.slideshow.init(settings, function (photo) { lastPhoto = photo.name; });
     Frame.slideshow.setCaption(Frame.photoInfo.caption);
+    Frame.slideshow.setYearFn(Frame.photoInfo.yearOf);
+    Frame.slideshow.setComposer(Frame.composer.choose);
 
     Frame.settings.onChange(function (s, changed) {
       applyVisualSettings(s);
@@ -597,7 +659,7 @@
         if (!ok) return;
         Frame.slideshow.refreshCaption();
         // El nombre del país del filtro necesita la tabla.
-        updateFilterButton(Frame.dropboxAuth.isConnected() && !!Frame.dropboxAuth.getFolder());
+        updateFilterButton(hasFolders());
       });
     }, 2000);
   }

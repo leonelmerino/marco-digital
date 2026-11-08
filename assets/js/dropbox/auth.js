@@ -30,7 +30,7 @@
   var AUTHORIZE_URL = 'https://www.dropbox.com/oauth2/authorize';
   var TOKEN_URL = 'https://api.dropboxapi.com/oauth2/token';
   var REVOKE_URL = 'https://api.dropboxapi.com/2/auth/token/revoke';
-  var ACCOUNT_KEY = 'dropbox.v1';       // { refreshToken, folder }
+  var ACCOUNT_KEY = 'dropbox.v1';       // { refreshToken, folders: [{ path, name }] }
   var PENDING_KEY = 'dropbox.pending';  // { verifier, state, at } durante el inicio de sesión
   var PENDING_MAX_MS = 30 * 60 * 1000;
   var EXPIRY_MARGIN_MS = 5 * 60 * 1000;
@@ -108,7 +108,7 @@
 
   function saveTokens(data) {
     if (!data.refresh_token) throw new Error('Dropbox no entregó token de renovación');
-    account = { refreshToken: data.refresh_token, folder: account ? account.folder : null };
+    account = { refreshToken: data.refresh_token, folders: account ? account.folders : [] };
     saveAccount();
     log('conectado');
     return true;
@@ -265,10 +265,18 @@
     });
   }
 
+  function validFolder(f) {
+    return f && typeof f.path === 'string' && typeof f.name === 'string';
+  }
+
   Frame.dropboxAuth = {
     init: function () {
       var stored = Frame.storage.read(ACCOUNT_KEY);
       account = stored && typeof stored.refreshToken === 'string' ? stored : null;
+      if (!account) return;
+      // Antes había una sola carpeta (`folder`).
+      var list = account.folders || (account.folder ? [account.folder] : []);
+      account = { refreshToken: account.refreshToken, folders: list.filter(validFolder) };
     },
     canConnectHere: canConnectHere,
     canUseCrypto: canUseCrypto,
@@ -279,10 +287,18 @@
     handleRedirect: handleRedirect,
     getAccessToken: getAccessToken,
     disconnect: disconnect,
-    getFolder: function () { return account ? account.folder : null; },
-    setFolder: function (folder) {
+    getFolders: function () { return account ? account.folders.slice() : []; },
+    addFolder: function (folder) {
       if (!account) return;
-      account.folder = folder;
+      for (var i = 0; i < account.folders.length; i++) {
+        if (account.folders[i].path === folder.path) return;
+      }
+      account.folders.push(folder);
+      saveAccount();
+    },
+    removeFolder: function (path) {
+      if (!account) return;
+      account.folders = account.folders.filter(function (f) { return f.path !== path; });
       saveAccount();
     }
   };

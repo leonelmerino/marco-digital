@@ -47,6 +47,27 @@
     return p.city ? p.city + ', ' + p.country : p.country;
   }
 
+  // Fecha de la toma { y, m, d } para ordenar y componer, sin pedir nada a
+  // Dropbox: del índice o de la leyenda si ya están, y si no del nombre del
+  // archivo (Camera Uploads los llama «2016-03-12 15.04.05.jpg»). null si no
+  // hay forma de saberla.
+  var NAME_DATE = /(?:^|[^\d])((?:19|20)\d{2})[-_.]?(0[1-9]|1[0-2])[-_.]?(0[1-9]|[12]\d|3[01])(?!\d)/;
+
+  function dateOf(photo) {
+    var rec = (Frame.photoIndex && photo.path && Frame.photoIndex.get(photo.path)) || photo.info;
+    if (rec && rec.exact) {
+      var fromRec = parseDate(rec.taken);
+      if (fromRec) return fromRec;
+    }
+    var m = NAME_DATE.exec(photo.name || '');
+    return m ? { y: Number(m[1]), m: Number(m[2]), d: Number(m[3]) } : null;
+  }
+
+  function yearOf(photo) {
+    var date = dateOf(photo);
+    return date ? date.y : 0;
+  }
+
   // Líneas para la leyenda; vacío si la foto no tiene datos.
   function caption(photo) {
     var info = photo.info;
@@ -59,5 +80,11 @@
     return lines;
   }
 
-  Frame.photoInfo = { caption: caption, dateLine: dateLine, parseDate: parseDate };
+  Frame.photoInfo = {
+    caption: caption,
+    dateLine: dateLine,
+    parseDate: parseDate,
+    dateOf: dateOf,
+    yearOf: yearOf
+  };
 })(window);

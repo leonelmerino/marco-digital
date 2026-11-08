@@ -15,6 +15,16 @@
  *   horizontal pasa a la vista siguiente (se intercambian en el orden).
  * La orientación se lee de la miniatura ya cargada (Dropbox la entrega girada
  * según la foto), así que la vista se arma foto a foto.
+ * Con un compositor (setComposer, ver composer.js), las compañeras de una
+ * vertical no son simplemente las siguientes: se eligen entre las próximas
+ * por color y por fecha parecida, y se adelantan en el orden.
+ *
+ * Orden aleatorio por ciclos que mezclan años (setYearFn): cada foto se toma
+ * de un año elegido al azar, con más peso para los años con más fotos pero
+ * sin que los años con pocas queden para el final, y sin repetir año seguido.
+ *
+ * Historial: las vistas ya mostradas se pueden volver a ver hacia atrás
+ * (prev) y luego hacia adelante (next) tal como eran.
  *
  * La fuente de fotos es una lista de { name, url } (fotos de prueba locales)
  * o de { name, path } (Dropbox). Las segundas se piden al cargador
@@ -32,6 +42,7 @@
 
   var FADE_MS = 1300;      // un poco más que la transición CSS
   var RETRY_MS = 400;      // espera antes de saltar una foto que falló
+  var COMPOSE_POOL = 12;   // candidatas a compañera de una vertical
 
   var layers = [];         // { el, cells: [{ el, img, caption }], … }
   var front = 0;
@@ -47,6 +58,12 @@
   var seq = 0;             // invalida esperas obsoletas
   var showing = false;     // la vista actual se está preparando en la capa oculta
   var opts = { interval: 30, order: 'random', transition: 'fade', grid: true };
+  var HISTORY_MAX = 50;
+  var history = [];        // vistas anteriores: [{ photos: [...] }]
+  var future = [];         // vistas por delante tras volver atrás
+  var current = null;      // vista visible: { photos: [...] }
+  var yearFn = null;       // function (photo) → año o 0
+  var composer = null;     // function (primary, candidatas) → Promise
   var emptyEl;
   var onShow = null;
   var loader = null;       // function (photo, callback(err, blobUrl), small)
@@ -71,15 +88,56 @@
     return list;
   }
 
-  function newCycle(previous) {
+  // Ciclo aleatorio que mezcla años: en cada paso se elige un año con peso
+  // proporcional a la raíz de sus fotos (2016 con 9000 fotos pesa 3 veces
+  // más que 2009 con 1000, no 9) y se toma una foto al azar de ese año.
+  function diverseCycle() {
+    var buckets = {};
+    var keys = [];
+    for (var i = 0; i < photos.length; i++) {
+      var y = yearFn(photos[i]) || 0;
+      if (!buckets[y]) { buckets[y] = []; keys.push(y); }
+      buckets[y].push(i);
+    }
+    if (keys.length < 2) return shuffle(buckets[keys[0]] || []);
+    for (var k = 0; k < keys.length; k++) shuffle(buckets[keys[k]]);
     var cycle = [];
-    for (var i = 0; i < photos.length; i++) cycle.push(i);
-    if (opts.order === 'random') {
-      shuffle(cycle);
-      // Evitar repetir la misma foto al empalmar dos ciclos.
-      if (cycle.length > 1 && cycle[0] === previous) {
-        var t = cycle[0]; cycle[0] = cycle[1]; cycle[1] = t;
+    var last = null;
+    while (cycle.length < photos.length) {
+      var total = 0;
+      var j;
+      for (j = 0; j < keys.length; j++) {
+        var n = buckets[keys[j]].length;
+        if (n && (keys[j] !== last || keys.length === 1)) total += Math.sqrt(n);
       }
+      if (!total) last = null; // solo queda el año anterior
+      var r = Math.random() * (total || 1);
+      var pick = -1;
+      for (j = 0; j < keys.length; j++) {
+        var m = buckets[keys[j]].length;
+        if (!m || (total && keys[j] === last)) continue;
+        pick = j;
+        r -= Math.sqrt(m);
+        if (r <= 0) break;
+      }
+      last = keys[pick];
+      cycle.push(buckets[last].pop());
+    }
+    return cycle;
+  }
+
+  function newCycle(previous) {
+    var cycle;
+    if (opts.order === 'random' && yearFn) {
+      cycle = diverseCycle();
+    } else {
+      cycle = [];
+      for (var i = 0; i < photos.length; i++) cycle.push(i);
+      if (opts.order === 'random') shuffle(cycle);
+    }
+    // Evitar repetir la misma foto al empalmar dos ciclos.
+    if (opts.order === 'random' && cycle.length > 1 && cycle[0] === previous) {
+      var t = cycle[0]; cycle[0] = cycle[1]; cycle[1] = t;
     }
     return cycle;
   }
@@ -225,10 +283,40 @@
     return true;
   }
 
+  // Lleva las fotos elegidas justo detrás de la posición p del orden.
+  function moveAfter(p, chosen) {
+    for (var c = 0; c < chosen.length; c++) {
+      var key = keyOf(chosen[c]);
+      for (var q = p + 1 + c; q < order.length; q++) {
+        if (keyOf(photoAt(q)) !== key) continue;
+        var idx = order.splice(q, 1)[0];
+        order.splice(p + 1 + c, 0, idx);
+        break;
+      }
+    }
+  }
+
+  // Carga en la capa las fotos de `photos` (la primera a tamaño completo) y
+  // la arma con esas celdas.
+  function loadView(layer, my, photos, done) {
+    var used = [];
+    var pending = photos.length;
+    var ok = true;
+    for (var i = 0; i < photos.length; i++) used.push(i);
+    photos.forEach(function (photo, i) {
+      loadImg(layer.cells[i], photo, i > 0, function (fine) {
+        if (my !== layer.gen) return;
+        ok = ok && fine;
+        if (--pending) return;
+        done(ok ? used : null);
+      });
+    });
+  }
+
   // Prepara en `layer` la vista que empieza en la posición p (que puede
   // moverse si ensureAhead recorta el historial). done(ok).
   function build(layer, p, done) {
-    p -= ensureAhead(p + 2);
+    p -= ensureAhead(p + COMPOSE_POOL);
     var cands = [photoAt(p), photoAt(p + 1), photoAt(p + 2)];
     // Con muy pocas fotos el orden puede repetir la primera: no juntarla consigo.
     for (var c = 1; c < 3; c++) {
@@ -236,12 +324,13 @@
     }
     if (cands[2] && keyOf(cands[2]) === keyOf(cands[1])) cands[2] = null;
 
-    if (sameCands(layer, cands) && layer.state !== 'error') {
+    if (!layer.forced && sameCands(layer, cands) && layer.state !== 'error') {
       if (layer.state === 'ready') { if (done) done(true); return; }
       layer.done = done; // ya se está preparando
       return;
     }
     var my = ++layer.gen;
+    layer.forced = false;
     layer.cands = cands;
     layer.state = 'building';
     layer.done = done;
@@ -254,14 +343,35 @@
       if (layer.done) layer.done(true);
     }
 
-    loadImg(layer.cells[0], cands[0], false, function (ok) {
-      if (my !== layer.gen) return;
-      if (!ok) {
-        layer.state = 'error';
-        if (layer.done) layer.done(false);
-        return;
+    // Compañeras elegidas por el compositor; si falla, las siguientes.
+    function compose() {
+      // Sin repetir: con pocas fotos el orden ya trae el ciclo siguiente.
+      var pool = [];
+      var taken = {};
+      taken[keyOf(cands[0])] = true;
+      for (var q = p + 1; q <= p + COMPOSE_POOL && q < order.length; q++) {
+        var cand = photoAt(q);
+        if (!cand || taken[keyOf(cand)]) continue;
+        taken[keyOf(cand)] = true;
+        pool.push(cand);
       }
-      if (!opts.grid || !cands[1] || fitsScreen(layer.cells[0].img)) { finish([0]); return; }
+      composer({ photo: cands[0], img: layer.cells[0].img, landscapeScreen: isLandscapeScreen() }, pool)
+        .then(function (chosen) {
+          if (my !== layer.gen) return;
+          if (!chosen || !chosen.length) { sequential(); return; }
+          moveAfter(p, chosen);
+          layer.cands = [cands[0], photoAt(p + 1), photoAt(p + 2)];
+          loadView(layer, my, [cands[0]].concat(chosen), function (used) {
+            if (my !== layer.gen) return;
+            // Si una compañera falló, la vertical sale sola.
+            finish(used && used.length === chosen.length + 1 ? used : [0]);
+          });
+        }, function () {
+          if (my === layer.gen) sequential();
+        });
+    }
+
+    function sequential() {
       loadImg(layer.cells[1], cands[1], true, function (ok1) {
         if (my !== layer.gen) return;
         if (!ok1) { finish([0]); return; }
@@ -274,6 +384,45 @@
           else finish([0, 2]);
         });
       });
+    }
+
+    loadImg(layer.cells[0], cands[0], false, function (ok) {
+      if (my !== layer.gen) return;
+      if (!ok) {
+        layer.state = 'error';
+        if (layer.done) layer.done(false);
+        return;
+      }
+      if (!opts.grid || !cands[1] || fitsScreen(layer.cells[0].img)) { finish([0]); return; }
+      if (composer) compose(); else sequential();
+    });
+  }
+
+  // Prepara una vista del historial, con las mismas fotos que tenía.
+  function buildView(layer, view, done) {
+    var ph = view.photos;
+    var cands = [ph[0], ph[1] || null, ph[2] || null];
+    if (layer.forced && sameCands(layer, cands) && layer.state !== 'error') {
+      if (layer.state === 'ready') { if (done) done(true); return; }
+      layer.done = done;
+      return;
+    }
+    var my = ++layer.gen;
+    layer.forced = true;
+    layer.cands = cands;
+    layer.state = 'building';
+    layer.done = done;
+    loadView(layer, my, ph, function (used) {
+      if (my !== layer.gen) return;
+      if (!used) {
+        layer.state = 'error';
+        if (layer.done) layer.done(false);
+        return;
+      }
+      layer.used = used;
+      layout(layer);
+      layer.state = 'ready';
+      if (layer.done) layer.done(true);
     });
   }
 
@@ -286,17 +435,54 @@
     showing = true;
     build(layer, p, function (ok) {
       if (my !== seq) return;
-      if (ok) reveal(layer); else failed(layer.cands[0]);
+      if (ok) reveal(layer, 'forward'); else failed(layer.cands[0]);
     });
   }
 
-  function reveal(layer) {
-    // Vertical + horizontal + vertical: la horizontal pasa a la vista siguiente.
-    if (layer.used.length === 2 && layer.used[1] === 2 &&
-        keyOf(photoAt(pos + 2)) === keyOf(layer.cands[2])) {
-      var t = order[pos + 1]; order[pos + 1] = order[pos + 2]; order[pos + 2] = t;
+  // Muestra una vista del historial (dir: 'back' o 'forward').
+  function showView(view, dir) {
+    clearTimers();
+    var my = ++seq;
+    var layer = backLayer();
+    showing = true;
+    buildView(layer, view, function (ok) {
+      if (my !== seq) return;
+      if (ok) { reveal(layer, dir); return; }
+      // La foto ya no se puede cargar: seguir con la presentación normal.
+      showing = false;
+      showAt(nextStart());
+    });
+  }
+
+  function forward() {
+    if (!photos.length) return;
+    if (future.length) showView(future.pop(), 'forward');
+    else showAt(nextStart());
+  }
+
+  function back() {
+    if (!history.length) return false;
+    showView(history.pop(), 'back');
+    return true;
+  }
+
+  function reveal(layer, dir) {
+    if (!layer.forced) {
+      // Vertical + horizontal + vertical: la horizontal pasa a la vista siguiente.
+      if (layer.used.length === 2 && layer.used[1] === 2 &&
+          keyOf(photoAt(pos + 2)) === keyOf(layer.cands[2])) {
+        var t = order[pos + 1]; order[pos + 1] = order[pos + 2]; order[pos + 2] = t;
+      }
+      count = layer.used.length;
     }
-    count = layer.used.length;
+    var shown = [];
+    for (var i = 0; i < layer.used.length; i++) shown.push(layer.cands[layer.used[i]]);
+    if (current) {
+      if (dir === 'back') future.push(current);
+      else history.push(current);
+      if (history.length > HISTORY_MAX) history.shift();
+    }
+    current = { photos: shown };
     var oldFront = layers[front];
     layer.el.className = 'layer visible';
     oldFront.el.className = 'layer';
@@ -304,10 +490,9 @@
     failures = 0;
     showing = false;
     emptyEl.className = 'empty hidden';
-    var names = [];
-    for (var i = 0; i < layer.used.length; i++) names.push(layer.cands[layer.used[i]].name);
-    if (onShow) onShow(layer.cands[0]);
-    Frame.compat.log('Mostrando ' + names.join(' + '));
+    if (onShow) onShow(shown[0]);
+    Frame.compat.log('Mostrando ' + shown.map(function (ph) { return ph.name; }).join(' + ') +
+      (dir === 'back' ? ' (atrás)' : ''));
 
     schedulePreload(opts.transition === 'fade' ? FADE_MS : 50);
     startTimer(opts.interval * 1000);
@@ -321,7 +506,8 @@
     preloadTimer = setTimeout(function () {
       // Nunca precargar en la capa donde todavía se prepara la vista actual.
       if (my !== seq || showing || !photos.length) return;
-      build(backLayer(), nextStart(), null);
+      if (future.length) buildView(backLayer(), future[future.length - 1], null);
+      else build(backLayer(), nextStart(), null);
     }, delay);
   }
 
@@ -350,7 +536,7 @@
     timer = null;
     shownAt = Date.now();
     if (!playing || !photos.length) return;
-    timer = setTimeout(function () { showAt(nextStart()); }, ms);
+    timer = setTimeout(forward, ms);
   }
 
   // Al volver a primer plano: los temporizadores pueden haberse congelado.
@@ -359,10 +545,10 @@
     if (pos < 0) { showAt(0); return; }
     var elapsed = Date.now() - shownAt;
     var remaining = opts.interval * 1000 - elapsed;
-    if (remaining <= 0) showAt(nextStart());
+    if (remaining <= 0) forward();
     else {
       clearTimeout(timer);
-      timer = setTimeout(function () { showAt(nextStart()); }, remaining);
+      timer = setTimeout(forward, remaining);
       schedulePreload(50); // `suspend` pudo cancelar la precarga
     }
   }
@@ -378,6 +564,9 @@
     count = 1;
     failures = 0;
     showing = false;
+    history = [];
+    future = [];
+    current = null;
     if (!photos.length) {
       showEmpty(emptyMessage || 'No hay fotografías para mostrar.');
       return;
@@ -466,7 +655,7 @@
 
   function makeLayer(id) {
     var el = document.getElementById(id);
-    var layer = { el: el, cells: [], gen: 0, state: null, cands: null, used: null, done: null };
+    var layer = { el: el, cells: [], gen: 0, state: null, cands: null, used: null, done: null, forced: false };
     for (var i = 0; i < 3; i++) {
       var cell = document.createElement('div');
       cell.className = 'cell hidden';
@@ -500,7 +689,11 @@
       if (layer && layer.state === 'ready' && layer.used) layout(layer);
     },
     relayout: relayout,
-    next: function () { if (photos.length) showAt(nextStart()); },
+    next: forward,
+    // Devuelve false si no hay nada más atrás.
+    prev: back,
+    setYearFn: function (fn) { yearFn = fn; },
+    setComposer: function (fn) { composer = fn; },
     play: function () { playing = true; resume(); },
     pause: function () { playing = false; clearTimeout(timer); timer = null; },
     isPlaying: function () { return playing; },

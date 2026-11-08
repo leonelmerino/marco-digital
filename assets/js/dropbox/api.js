@@ -88,5 +88,24 @@
     }).then(function (response) { return response.blob(); });
   }
 
-  Frame.dropboxApi = { rpc: rpc, thumbnail: thumbnail };
+  // Hasta 25 miniaturas diminutas (64×64, `bestfit`) en una sola llamada, en
+  // base64. Sirven para ver la orientación y el color de varias fotos sin
+  // descargarlas. Devuelve { entries: [{ '.tag': 'success', metadata,
+  // thumbnail } | { '.tag': 'failure', … }] } en el mismo orden.
+  function thumbnailBatch(paths) {
+    var body = JSON.stringify({
+      entries: paths.map(function (path) {
+        return { path: path, format: 'jpeg', size: 'w64h64', mode: 'bestfit' };
+      })
+    });
+    return call(function (token) {
+      return global.fetch(CONTENT + 'files/get_thumbnail_batch', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: body
+      });
+    }).then(function (response) { return response.json(); });
+  }
+
+  Frame.dropboxApi = { rpc: rpc, thumbnail: thumbnail, thumbnailBatch: thumbnailBatch };
 })(window);

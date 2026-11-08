@@ -1,12 +1,15 @@
 /*
- * Biblioteca de fotos de Dropbox.
+ * Biblioteca de fotos de Dropbox, de una o varias carpetas.
  *
- * - La lista de la carpeta llega por páginas (files/list_folder y
+ * - La lista de cada carpeta llega por páginas (files/list_folder y
  *   list_folder/continue). Cada página se procesa y se descarta: de cada foto
  *   solo se guarda { name, path }. La presentación empieza con la primera
  *   página, sin esperar a la lista completa.
  * - Con más de MAX_PHOTOS fotos se guarda una muestra aleatoria uniforme
- *   (muestreo de reservorio) para no agotar la memoria del iPad.
+ *   (muestreo de reservorio) para no agotar la memoria del iPad; con varias
+ *   carpetas el límite se reparte entre ellas.
+ * - Las carpetas se listan una tras otra y se unen sin repetir fotos (una
+ *   carpeta puede estar dentro de otra).
  * - Cada REFRESH_MS se piden solo los cambios desde la última vez (cursor).
  * - Las fotos se muestran con la versión reducida que genera Dropbox, nunca
  *   con el archivo original. Junto con cada una se piden su fecha y su
@@ -25,13 +28,10 @@
   // Formatos de los que Dropbox genera miniaturas. HEIC/HEIF por verificar.
   var PHOTO_EXT = /\.(jpe?g|png|gif|webp|tiff?|bmp|heic|heif)$/i;
 
-  var gen = 0;             // invalida listados de una carpeta anterior
-  var folder = null;       // { path, name }
+  var gen = 0;             // invalida listados de una configuración anterior
+  var sources = [];        // una por carpeta: { folder, photos, seen, cursor, listing }
   var recursive = true;
-  var photos = [];
-  var seen = 0;            // fotos vistas en total (para el muestreo)
-  var cursor = null;
-  var listing = false;
+  var photos = [];         // todas las carpetas juntas, sin repetir
   var refreshTimer = null;
   var onUpdate = function () {};
   var onStatus = function () {};
@@ -40,138 +40,187 @@
 
   function isPhoto(name) { return PHOTO_EXT.test(name); }
 
-  function relativeName(entry) {
-    var prefix = folder.path ? folder.name.length + 1 : 1;
-    return entry.path_display.slice(prefix) || entry.name;
-  }
+  function folderLabel(folder) { return folder.name || 'todo Dropbox'; }
 
-  function add(entry) {
-    var photo = { name: relativeName(entry), path: entry.path_lower };
-    seen++;
-    if (photos.length < MAX_PHOTOS) {
-      photos.push(photo);
+  // Con varias carpetas, el límite de memoria se reparte entre ellas.
+  function maxPerSource() { return Math.floor(MAX_PHOTOS / Math.max(1, sources.length)); }
+
+  function add(src, entry) {
+    var photo = { name: entry.path_display.replace(/^\//, '') || entry.name, path: entry.path_lower };
+    var max = maxPerSource();
+    src.seen++;
+    if (src.photos.length < max) {
+      src.photos.push(photo);
     } else {
-      var j = Math.floor(Math.random() * seen);
-      if (j < MAX_PHOTOS) photos[j] = photo;
+      var j = Math.floor(Math.random() * src.seen);
+      if (j < max) src.photos[j] = photo;
     }
   }
 
-  function removeAll(deleted) {
+  function removeAll(src, deleted) {
     if (!deleted.length) return;
-    var before = photos.length;
-    photos = photos.filter(function (p) {
+    var before = src.photos.length;
+    src.photos = src.photos.filter(function (p) {
       for (var i = 0; i < deleted.length; i++) {
         if (p.path === deleted[i] || p.path.indexOf(deleted[i] + '/') === 0) return false;
       }
       return true;
     });
     // Con muestra solo se sabe cuántas de la muestra se borraron.
-    seen = Math.max(photos.length, seen - (before - photos.length));
+    src.seen = Math.max(src.photos.length, src.seen - (before - src.photos.length));
   }
 
-  function apply(entries) {
+  function apply(src, entries) {
     var deleted = [];
     for (var i = 0; i < entries.length; i++) {
       var e = entries[i];
-      if (e['.tag'] === 'file' && isPhoto(e.name)) add(e);
+      if (e['.tag'] === 'file' && isPhoto(e.name)) add(src, e);
       else if (e['.tag'] === 'deleted') deleted.push(e.path_lower);
     }
-    removeAll(deleted);
+    removeAll(src, deleted);
   }
 
-  function describe(err) {
+  // Une las carpetas. Si una está dentro de otra, sus fotos no se repiten.
+  function merge() {
+    var seenPaths = Object.create(null);
+    var out = [];
+    for (var s = 0; s < sources.length; s++) {
+      var list = sources[s].photos;
+      for (var i = 0; i < list.length; i++) {
+        if (seenPaths[list[i].path]) continue;
+        seenPaths[list[i].path] = true;
+        out.push(list[i]);
+      }
+    }
+    photos = out;
+  }
+
+  function describe(src, err) {
     var s = err.summary || '';
-    if (/not_found/.test(s)) return 'La carpeta ya no existe en Dropbox. Elige otra.';
+    if (/not_found/.test(s)) return 'La carpeta «' + folderLabel(src.folder) + '» ya no existe en Dropbox. Quítala en Configuración.';
     if (err.status === 401 || /invalid_grant|No conectado/.test(err.code + ' ' + err.message)) {
       return 'Dropbox pide volver a conectar.';
     }
     return 'No se pudo leer Dropbox (' + (s || err.message) + '). Se reintentará.';
   }
 
-  function failed(err, my) {
+  function failed(src, err, my) {
     if (my !== gen) return;
-    listing = false;
-    log('error al listar: ' + (err.summary || err.message), true);
-    onStatus(describe(err), true);
+    src.listing = false;
+    src.error = describe(src, err);
+    log('error al listar «' + folderLabel(src.folder) + '»: ' + (err.summary || err.message), true);
+    onStatus(statusText(), true);
     clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(function () { if (my === gen) refresh(); }, RETRY_MS);
+    refreshTimer = setTimeout(function () { if (my === gen) refreshAll(); }, RETRY_MS);
   }
 
   function statusText() {
+    var seen = 0;
+    var listing = false;
+    var errors = [];
+    for (var i = 0; i < sources.length; i++) {
+      seen += sources[i].seen;
+      listing = listing || sources[i].listing;
+      if (sources[i].error) errors.push(sources[i].error);
+    }
     var text = photos.length === 1 ? '1 foto' : photos.length + ' fotos';
-    if (seen > photos.length) text = 'muestra de ' + photos.length + ' de ' + seen + ' fotos';
-    return text + (listing ? ' · buscando más…' : '');
+    if (seen > photos.length && sources.some(function (s) { return s.seen > s.photos.length; })) {
+      text = 'muestra de ' + photos.length + ' de ' + seen + ' fotos';
+    }
+    if (listing) text += ' · buscando más…';
+    if (errors.length) text += ' · ' + errors.join(' ');
+    return text;
   }
 
-  function page(result, my) {
+  function anyListing() {
+    for (var i = 0; i < sources.length; i++) if (sources[i].listing) return true;
+    return false;
+  }
+
+  function page(src, result, my) {
     if (my !== gen) return null;
-    apply(result.entries);
-    cursor = result.cursor;
+    apply(src, result.entries);
+    src.cursor = result.cursor;
+    src.error = '';
+    merge();
     onUpdate(photos);
     onStatus(statusText(), false);
     if (result.has_more) {
-      return Frame.dropboxApi.rpc('files/list_folder/continue', { cursor: cursor })
-        .then(function (next) { return page(next, my); });
+      return Frame.dropboxApi.rpc('files/list_folder/continue', { cursor: src.cursor })
+        .then(function (next) { return page(src, next, my); });
     }
-    var wasListing = listing;
-    listing = false;
-    if (wasListing) log('lista completa: ' + statusText());
+    var wasListing = src.listing;
+    src.listing = false;
+    if (wasListing) log('lista completa de «' + folderLabel(src.folder) + '»: ' + src.photos.length + ' fotos');
     onStatus(statusText(), false);
-    clearTimeout(refreshTimer);
-    refreshTimer = setTimeout(function () { if (my === gen) refresh(); }, REFRESH_MS);
+    if (!anyListing()) {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(function () { if (my === gen) refreshAll(); }, REFRESH_MS);
+    }
     return null;
   }
 
-  function fullList(my) {
-    listing = true;
-    photos = [];
-    seen = 0;
-    cursor = null;
+  function fullList(src, my) {
+    src.listing = true;
+    src.photos = [];
+    src.seen = 0;
+    src.cursor = null;
     onStatus('Buscando fotos…', false);
     return Frame.dropboxApi.rpc('files/list_folder', {
-      path: folder.path,
+      path: src.folder.path,
       recursive: recursive,
       limit: PAGE_LIMIT
-    }).then(function (result) { return page(result, my); })
-      .catch(function (err) { failed(err, my); });
+    }).then(function (result) { return page(src, result, my); })
+      .catch(function (err) { failed(src, err, my); });
   }
 
   // Solo los cambios desde la última lista; si Dropbox anula el cursor, se
-  // vuelve a listar todo (la presentación sigue con la lista anterior).
-  function refresh() {
+  // vuelve a listar la carpeta (la presentación sigue con la lista anterior).
+  function refresh(src) {
     var my = gen;
-    if (!cursor) return fullList(my);
-    return Frame.dropboxApi.rpc('files/list_folder/continue', { cursor: cursor })
-      .then(function (result) { return page(result, my); })
+    if (!src.cursor) return fullList(src, my);
+    return Frame.dropboxApi.rpc('files/list_folder/continue', { cursor: src.cursor })
+      .then(function (result) { return page(src, result, my); })
       .catch(function (err) {
         if (/^reset/.test(err.summary || '')) {
-          log('cursor anulado; se vuelve a listar la carpeta');
-          var keep = photos;
-          return fullList(my).then(function () { if (!photos.length) photos = keep; });
+          log('cursor anulado; se vuelve a listar «' + folderLabel(src.folder) + '»');
+          var keep = src.photos;
+          return fullList(src, my).then(function () {
+            if (!src.photos.length) { src.photos = keep; merge(); }
+          });
         }
-        failed(err, my);
+        failed(src, err, my);
       });
+  }
+
+  function refreshAll() {
+    for (var i = 0; i < sources.length; i++) if (!sources[i].listing) refresh(sources[i]);
   }
 
   // ---- API pública ----
 
-  function start(newFolder, includeSubfolders, callbacks) {
+  function start(folders, includeSubfolders, callbacks) {
     stop();
-    folder = newFolder;
     recursive = includeSubfolders;
     onUpdate = callbacks.onUpdate;
     onStatus = callbacks.onStatus;
-    log('carpeta «' + (folder.name || '/') + '»' + (recursive ? ' con subcarpetas' : ''));
-    fullList(gen);
+    sources = folders.map(function (f) {
+      return { folder: f, photos: [], seen: 0, cursor: null, listing: false, error: '' };
+    });
+    log(folders.map(function (f) { return '«' + folderLabel(f) + '»'; }).join(', ') +
+      (recursive ? ' con subcarpetas' : ''));
+    // Una carpeta tras otra: la primera foto sale con la primera página.
+    var my = gen;
+    sources.reduce(function (chain, src) {
+      return chain.then(function () { if (my === gen) return fullList(src, my); });
+    }, Promise.resolve());
   }
 
   function stop() {
     gen++;
     clearTimeout(refreshTimer);
-    listing = false;
+    sources = [];
     photos = [];
-    seen = 0;
-    cursor = null;
   }
 
   // Fecha y lugar de la foto, del índice (photo-index.js) o de Dropbox. Un
@@ -235,7 +284,7 @@
   Frame.dropboxLibrary = {
     start: start,
     stop: stop,
-    refresh: function () { if (folder && !listing) refresh(); },
+    refresh: function () { if (sources.length) refreshAll(); },
     load: load,
     browse: browse,
     photos: function () { return photos; }

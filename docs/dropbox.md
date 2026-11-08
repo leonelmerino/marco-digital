@@ -68,6 +68,15 @@ que desde la red local (`http://192.168.x.x:8010`) no se puede conectar: hay
 que usar la dirección publicada. Cada dirección (Pages, localhost) guarda su
 propia conexión.
 
+## Varias carpetas
+
+En Configuración › Dropbox, **Agregar carpeta** suma carpetas y cada una se
+puede **Quitar**. Se listan una tras otra (la presentación empieza con la
+primera página de la primera) y se unen sin repetir fotos, aunque una carpeta
+esté dentro de otra. El límite de 100 000 fotos en memoria se reparte entre
+las carpetas. La conexión guardada pasó de `folder` a `folders`; la carpeta
+única de antes se convierte sola en la primera de la lista.
+
 ## Lugar y fecha de cada foto
 
 Abajo a la izquierda (a la derecha si el reloj está abajo a la izquierda) se
@@ -163,4 +172,13 @@ recuerda; el botón muestra el filtro («📍 Francia · 2016–2020») y se pon
   «Francia · 2016–2020» muestra solo esas fotos; al recargar, el filtro sigue
   y no se repite ninguna consulta (índice desde IndexedDB); el deslizador
   responde a toques simulados; borrar el índice deja IndexedDB vacío.
-- **Pendiente:** HEIC, filtro en el iPad, velocidad real del índice.
+- Varias carpetas, deslizar, orden y composición, con Dropbox simulado (dos
+  carpetas, 350 fotos, 70 % de 2023–2025, color según el mes): la carpeta
+  única guardada se convirtió en lista; 350 fotos sin repetir; en 56 fotos
+  mostradas salieron 16 años distintos y solo el 41 % de 2023–2025; las
+  parejas y tríos juntan meses iguales o vecinos (08-07, 02-02-03, 12-12-01);
+  tres veces atrás y tres adelante devuelven las mismas vistas; quitar una
+  carpeta deja 300 fotos.
+- **Pendiente:** HEIC, filtro en el iPad, velocidad real del índice;
+  `get_thumbnail_batch` con Dropbox real (si falla, la grilla vuelve a tomar
+  las fotos siguientes y el diagnóstico lo anota).

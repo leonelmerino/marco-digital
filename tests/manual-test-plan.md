@@ -72,6 +72,10 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 52 | Filtro: país y años | Elegir un país, arrastrar los dos extremos del deslizador, Listo | El botón dice «📍 País · AAAA–AAAA» en azul; solo salen fotos de ese país y esos años | |
 | 53 | Filtro: recarga | Configuración › Recargar página | El filtro sigue; el panel no vuelve a 0 % | |
 | 54 | Filtro: quitar | Panel › Quitar filtro › Listo | Vuelven todas las fotos; el botón dice «📍 Todas» | |
+| 55 | Varias carpetas | Configuración › Agregar carpeta › elegir otra | La lista muestra las dos; el número de fotos suma ambas; «Quitar» la saca | |
+| 56 | Deslizar | Deslizar a la izquierda dos veces y a la derecha dos veces | Avanza dos vistas y vuelve a ellas tal como eran; un toque corto sigue mostrando los controles | |
+| 57 | Años variados | Mirar 20 vistas | Salen años distintos, no casi solo los recientes | |
+| 58 | Grilla por color | Mirar varias grillas | Las fotos de una grilla tienen colores o épocas del año parecidas; el diagnóstico no muestra errores de get_thumbnail_batch | |
 | 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 
 ## Cómo registrar un fallo
