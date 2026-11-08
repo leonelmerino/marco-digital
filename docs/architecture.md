@@ -21,6 +21,7 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `data/cities.js` | `Frame.cityData` | Tabla generada (GeoNames + Natural Earth, ~1,4 MB; ~650 KB comprimida). No se edita a mano. |
 | `sample-photos.js` | `Frame.samplePhotos` | Fotos de prueba, cuando no hay Dropbox conectado. |
 | `radio/stations.js` | `Frame.radioStations` | Estaciones predefinidas y sus URLs. Se carga antes de `settings.js`. |
+| `radio/now-playing.js` | `Frame.nowPlaying` | Canción, artista, álbum y carátula de las estaciones de Triton, cada 20 s mientras suenan. |
 | `radio/radio-player.js` | `Frame.radio` | Dos `<audio>`: conectar, reintentar, URLs de respaldo, escaneo sin silencios, estados. |
 | `vendor/qrcode.js` | `qrcode` | Biblioteca externa (MIT) para dibujar el QR de inicio de sesión. |
 | `dropbox/config.js` | `Frame.dropboxConfig` | App key pública. |
@@ -76,6 +77,10 @@ o del nombre del archivo; las fotos sin año forman su propio grupo.
 **Historial.** Se guardan las últimas 50 vistas mostradas. Deslizar hacia la
 derecha (o la flecha ← en el Mac) vuelve a ellas tal como eran; hacia la
 izquierda se avanza por las que se dejaron atrás y luego se sigue el orden.
+El gesto usa un fundido de 0,25 s y, si la vista aún se descarga, muestra una
+flecha en el borde; otro gesto mientras tanto se ignora, para no saltar dos
+vistas. Las últimas 10 miniaturas quedan en memoria (~3 MB), así que volver
+atrás no las descarga de nuevo.
 
 **Un solo temporizador.** `slideshow.js` guarda un único `timer` y lo limpia
 antes de crear otro. El temporizador arranca cuando la vista ya está visible,

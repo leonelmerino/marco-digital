@@ -10,7 +10,7 @@
   <meta name="theme-color" content="#000000">
   <title>Marco digital</title>
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-  <link rel="stylesheet" href="assets/css/styles.css?v=8">
+  <link rel="stylesheet" href="assets/css/styles.css?v=9">
 </head>
 <body class="controls-visible">
   <!-- Modo marco: dos capas para el fundido, cada una con una a tres fotos -->
@@ -20,6 +20,7 @@
     <div id="layer-b" class="layer"></div>
     <div id="dimmer" class="dimmer"></div>
     <div id="empty" class="empty hidden">No hay fotografías para mostrar.</div>
+    <div id="nav-hint" class="nav-hint hidden"></div>
   </div>
 
   <div id="clock" class="clock pos-bottom-right size-m">
@@ -28,6 +29,15 @@
   </div>
 
   <div id="status" class="status hidden" role="status"></div>
+
+  <!-- Canción que suena en la radio (estaciones de Triton) -->
+  <div id="song" class="song hidden">
+    <img id="song-cover" class="song-cover hidden" alt="">
+    <div class="song-text">
+      <div id="song-title" class="song-title"></div>
+      <div id="song-artist" class="song-artist"></div>
+    </div>
+  </div>
 
   <!-- Controles: aparecen al tocar la pantalla -->
   <div id="controls" class="controls">
@@ -55,6 +65,7 @@
         <div class="radio-info">
           <div id="radio-station-name" class="radio-station-name"></div>
           <div id="radio-status" class="radio-status"></div>
+          <div id="radio-song" class="radio-song"></div>
         </div>
         <button type="button" id="btn-scan" class="radio-scan">&#8635; Escanear</button>
       </div>
@@ -209,6 +220,7 @@
 
         <section>
           <h2>Radio</h2>
+          <label class="row">Mostrar la canción en pantalla <input type="checkbox" name="radioInfo"></label>
           <p class="note">Usa el botón &#9834; Estaciones de los controles para elegir una estación.</p>
         </section>
 
@@ -270,25 +282,26 @@
   <!-- Scripts clásicos (sin módulos ni compilación) para Safari de iOS 12.
        ?v=N: subirlo en cada publicación para que el iPad no mezcle archivos
        nuevos con otros guardados en caché. -->
-  <script src="assets/js/compatibility.js?v=8"></script>
-  <script src="assets/js/storage.js?v=8"></script>
-  <script src="assets/js/radio/stations.js?v=8"></script>
-  <script src="assets/js/settings.js?v=8"></script>
-  <script src="assets/js/clock.js?v=8"></script>
-  <script src="assets/js/slideshow.js?v=8"></script>
-  <script src="assets/js/geo.js?v=8"></script>
-  <script src="assets/js/photo-info.js?v=8"></script>
-  <script src="assets/js/composer.js?v=8"></script>
-  <script src="assets/js/sample-photos.js?v=8"></script>
-  <script src="assets/js/radio/radio-player.js?v=8"></script>
-  <script src="assets/js/vendor/qrcode.js?v=8"></script>
-  <script src="assets/js/dropbox/config.js?v=8"></script>
-  <script src="assets/js/dropbox/auth.js?v=8"></script>
-  <script src="assets/js/dropbox/api.js?v=8"></script>
-  <script src="assets/js/dropbox/library.js?v=8"></script>
-  <script src="assets/js/dropbox/photo-index.js?v=8"></script>
-  <script src="assets/js/photo-filter.js?v=8"></script>
-  <script src="assets/js/filter-ui.js?v=8"></script>
-  <script src="assets/js/app.js?v=8"></script>
+  <script src="assets/js/compatibility.js?v=9"></script>
+  <script src="assets/js/storage.js?v=9"></script>
+  <script src="assets/js/radio/stations.js?v=9"></script>
+  <script src="assets/js/settings.js?v=9"></script>
+  <script src="assets/js/clock.js?v=9"></script>
+  <script src="assets/js/slideshow.js?v=9"></script>
+  <script src="assets/js/geo.js?v=9"></script>
+  <script src="assets/js/photo-info.js?v=9"></script>
+  <script src="assets/js/composer.js?v=9"></script>
+  <script src="assets/js/sample-photos.js?v=9"></script>
+  <script src="assets/js/radio/radio-player.js?v=9"></script>
+  <script src="assets/js/radio/now-playing.js?v=9"></script>
+  <script src="assets/js/vendor/qrcode.js?v=9"></script>
+  <script src="assets/js/dropbox/config.js?v=9"></script>
+  <script src="assets/js/dropbox/auth.js?v=9"></script>
+  <script src="assets/js/dropbox/api.js?v=9"></script>
+  <script src="assets/js/dropbox/library.js?v=9"></script>
+  <script src="assets/js/dropbox/photo-index.js?v=9"></script>
+  <script src="assets/js/photo-filter.js?v=9"></script>
+  <script src="assets/js/filter-ui.js?v=9"></script>
+  <script src="assets/js/app.js?v=9"></script>
 </body>
 </html>

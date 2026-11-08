@@ -31,6 +31,7 @@
     setBodyClass('info-hidden', !s.photoInfo);
     // La leyenda va en la esquina inferior que no ocupa el reloj.
     setBodyClass('captions-right', s.clockVisible && s.clockPosition === 'bottom-left');
+    setBodyClass('song-right', s.clockVisible && s.clockPosition === 'top-left');
     Frame.compat.setDebugVisible(s.debug);
   }
 
@@ -83,14 +84,20 @@
       swipeStart = null;
       if (!quick || Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
       swipedAt = Date.now();
-      if (dx < 0) Frame.slideshow.next();
-      else Frame.slideshow.prev();
+      if (dx < 0) Frame.slideshow.swipeNext();
+      else Frame.slideshow.swipePrev();
     });
     // En el Mac, con las flechas del teclado.
     document.addEventListener('keydown', function (event) {
       if (event.target !== document.body) return;
-      if (event.keyCode === 39) Frame.slideshow.next();
-      else if (event.keyCode === 37) Frame.slideshow.prev();
+      if (event.keyCode === 39) Frame.slideshow.swipeNext();
+      else if (event.keyCode === 37) Frame.slideshow.swipePrev();
+    });
+    Frame.slideshow.setNavHint(function (dir) {
+      var hint = $('nav-hint');
+      if (!dir) { hint.className = 'nav-hint hidden'; return; }
+      hint.textContent = dir === 'back' ? '\u2039' : '\u203A';
+      hint.className = 'nav-hint ' + dir;
     });
   }
 
@@ -159,15 +166,46 @@
     scan.innerHTML = state.scanning ? 'Quedarme aquí' : '&#8635; Escanear';
     scan.className = state.scanning ? 'radio-scan on' : 'radio-scan';
 
+    // Solo se pregunta qué suena mientras la radio se oye.
+    Frame.nowPlaying.watch(state.status === 'playing' ? station : null);
+
     var now = $('radio-now');
     if (state.status === 'off') {
       now.className = 'radio-now hidden';
     } else {
-      now.textContent = '♪ ' + (state.scanning ? 'Escaneando · ' + label : label + ' · ' + state.message);
+      var song = state.status === 'playing' ? songText(Frame.nowPlaying.get()) : '';
+      now.textContent = '♪ ' + (state.scanning ? 'Escaneando · ' + label : label + ' · ' + (song || state.message));
       now.className = isError ? 'radio-now error' : 'radio-now';
     }
     // Avisar aunque los controles estén ocultos.
     if (isError || state.status === 'blocked') showControls();
+  }
+
+  // ---- Qué suena ----
+
+  function songText(info) {
+    if (!info) return '';
+    if (info.kind === 'ad') return 'Tanda comercial';
+    return info.title + (info.artist ? ' — ' + info.artist : '');
+  }
+
+  function renderSong(info) {
+    var show = Frame.settings.get().radioInfo && info && info.kind === 'track';
+    $('song').className = show ? 'song' : 'song hidden';
+    if (show) {
+      $('song-title').textContent = info.title;
+      $('song-artist').textContent = info.artist + (info.album && info.album !== info.title ? ' · ' + info.album : '');
+      var cover = $('song-cover');
+      if (info.cover) {
+        if (cover.getAttribute('src') !== info.cover) cover.src = info.cover;
+        cover.className = 'song-cover';
+      } else {
+        cover.removeAttribute('src');
+        cover.className = 'song-cover hidden';
+      }
+    }
+    $('radio-song').textContent = info ? '♫ ' + songText(info) : '';
+    updateRadioUI(Frame.radio.getState());
   }
 
   function stopScanHere() {
@@ -190,7 +228,10 @@
     Frame.radio.init(Frame.radioStations, settings.radioStation);
     Frame.radio.setVolume(settings.radioVolume);
     Frame.radio.onChange(updateRadioUI);
+    Frame.nowPlaying.onChange(renderSong);
     updateRadioUI(Frame.radio.getState());
+    // Una carátula que no carga no debe dejar un hueco.
+    $('song-cover').addEventListener('error', function () { $('song-cover').className = 'song-cover hidden'; });
 
     // play() tiene que ocurrir dentro del toque para que iOS permita el sonido.
     $('radio-stations').addEventListener('click', function (event) {
@@ -632,6 +673,7 @@
       Frame.clock.configure(s);
       Frame.slideshow.configure(s);
       if (changed === 'dropboxRecursive') startPhotos();
+      if (changed === 'radioInfo') renderSong(Frame.nowPlaying.get());
     });
 
     bindControls();

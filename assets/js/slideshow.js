@@ -43,6 +43,7 @@
   var FADE_MS = 1300;      // un poco más que la transición CSS
   var RETRY_MS = 400;      // espera antes de saltar una foto que falló
   var COMPOSE_POOL = 12;   // candidatas a compañera de una vertical
+  var QUICK_MS = 300;      // fundido al deslizar (un poco más que el CSS)
 
   var layers = [];         // { el, cells: [{ el, img, caption }], … }
   var front = 0;
@@ -64,6 +65,8 @@
   var current = null;      // vista visible: { photos: [...] }
   var yearFn = null;       // function (photo) → año o 0
   var composer = null;     // function (primary, candidatas) → Promise
+  var userNav = null;      // 'forward' | 'back' mientras se atiende un gesto
+  var onNav = null;        // function (dir o null): aviso de carga del gesto
   var emptyEl;
   var onShow = null;
   var loader = null;       // function (photo, callback(err, blobUrl), small)
@@ -435,7 +438,7 @@
     showing = true;
     build(layer, p, function (ok) {
       if (my !== seq) return;
-      if (ok) reveal(layer, 'forward'); else failed(layer.cands[0]);
+      if (ok) reveal(layer, 'forward'); else { endNav(); failed(layer.cands[0]); }
     });
   }
 
@@ -450,6 +453,7 @@
       if (ok) { reveal(layer, dir); return; }
       // La foto ya no se puede cargar: seguir con la presentación normal.
       showing = false;
+      endNav();
       showAt(nextStart());
     });
   }
@@ -463,6 +467,24 @@
   function back() {
     if (!history.length) return false;
     showView(history.pop(), 'back');
+    return true;
+  }
+
+  function endNav() {
+    if (!userNav) return;
+    userNav = null;
+    if (onNav) onNav(null);
+  }
+
+  // Gesto del usuario: fundido corto y, mientras carga, un aviso. Un segundo
+  // gesto antes de que aparezca la vista se ignora (no salta dos de golpe).
+  function navigate(dir) {
+    if (userNav || !photos.length) return false;
+    if (dir === 'back' && !history.length) return false;
+    userNav = dir;
+    if (dir === 'back') back(); else forward();
+    // Si la vista ya estaba lista, reveal() ya terminó el gesto.
+    if (userNav && onNav) onNav(dir);
     return true;
   }
 
@@ -483,9 +505,11 @@
       if (history.length > HISTORY_MAX) history.shift();
     }
     current = { photos: shown };
+    var quick = !!userNav;
+    endNav();
     var oldFront = layers[front];
-    layer.el.className = 'layer visible';
-    oldFront.el.className = 'layer';
+    layer.el.className = quick ? 'layer visible quick' : 'layer visible';
+    oldFront.el.className = quick ? 'layer quick' : 'layer';
     front = 1 - front;
     failures = 0;
     showing = false;
@@ -494,7 +518,7 @@
     Frame.compat.log('Mostrando ' + shown.map(function (ph) { return ph.name; }).join(' + ') +
       (dir === 'back' ? ' (atrás)' : ''));
 
-    schedulePreload(opts.transition === 'fade' ? FADE_MS : 50);
+    schedulePreload(quick ? QUICK_MS : opts.transition === 'fade' ? FADE_MS : 50);
     startTimer(opts.interval * 1000);
   }
 
@@ -690,7 +714,10 @@
     },
     relayout: relayout,
     next: forward,
-    // Devuelve false si no hay nada más atrás.
+    // Gestos: devuelven false si se ignoran (sin historial o ya en curso).
+    swipeNext: function () { return navigate('forward'); },
+    swipePrev: function () { return navigate('back'); },
+    setNavHint: function (fn) { onNav = fn; },
     prev: back,
     setYearFn: function (fn) { yearFn = fn; },
     setComposer: function (fn) { composer = fn; },

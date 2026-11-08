@@ -221,6 +221,7 @@
     clearTimeout(refreshTimer);
     sources = [];
     photos = [];
+    blobCache = [];
   }
 
   // Fecha y lugar de la foto, del índice (photo-index.js) o de Dropbox. Un
@@ -234,6 +235,36 @@
     });
   }
 
+  // Últimas miniaturas descargadas (~300 KB cada una): volver atrás con el
+  // gesto no las pide de nuevo a Dropbox.
+  var BLOB_CACHE_MAX = 10;
+  var blobCache = [];      // [{ key, blob }], la más reciente al final
+
+  function cachedBlob(key) {
+    for (var i = 0; i < blobCache.length; i++) {
+      if (blobCache[i].key !== key) continue;
+      var hit = blobCache.splice(i, 1)[0];
+      blobCache.push(hit);
+      return hit.blob;
+    }
+    return null;
+  }
+
+  function keepBlob(key, blob) {
+    blobCache.push({ key: key, blob: blob });
+    if (blobCache.length > BLOB_CACHE_MAX) blobCache.shift();
+  }
+
+  function thumbnail(photo, small) {
+    var key = photo.path + (small ? '#s' : '');
+    var blob = cachedBlob(key);
+    if (blob) return Promise.resolve(blob);
+    return Frame.dropboxApi.thumbnail(photo.path, small).then(function (fresh) {
+      keepBlob(key, fresh);
+      return fresh;
+    });
+  }
+
   // Cargador para la presentación: devuelve una URL blob: de la miniatura
   // (más pequeña con `small`).
   function load(photo, callback, small) {
@@ -244,7 +275,7 @@
       callback(new Error('tiempo agotado'));
     }, THUMB_TIMEOUT_MS);
     Promise.all([
-      Frame.dropboxApi.thumbnail(photo.path, small),
+      thumbnail(photo, small),
       fetchInfo(photo)
     ]).then(function (results) {
       var blob = results[0];

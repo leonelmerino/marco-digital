@@ -79,5 +79,22 @@ El botón **Escanear** recorre las estaciones en orden y en bucle infinito
 - **Interrupciones:** si iOS pausa el audio (llamada, otra app con sonido,
   bloqueo), la app muestra «Toca ▶ para seguir». Hay que comprobar en el iPad si
   el audio sigue con la pantalla bloqueada.
-- **Canción en curso:** no se muestra; las señales no la ofrecen de forma
-  accesible desde el navegador.
+- **Canción en curso:** ver la sección siguiente.
+
+## Qué suena
+
+Revisión del 08-11-2026 de los datos que trae cada señal:
+
+| Estaciones | Qué traen | Se puede leer desde la página |
+| --- | --- | --- |
+| Corazón, Imagina, Activa, Pudahuel, FMDOS, Concierto, Futuro, Rock & Pop, ADN (Triton) | Título y artista dentro del audio (ICY) y, aparte, `np.tritondigital.com/public/nowplaying`: título, artista, álbum, carátula, canciones anteriores y tandas comerciales | Sí: la consulta aparte permite CORS |
+| Carolina (Mediastream) | Título y artista dentro del audio (ICY) | No: el servidor no acepta la cabecera `Icy-MetaData` desde otra página |
+| Bío-Bío, Cooperativa, Agricultura, Beethoven (DPS) | Campo de título vacío | — |
+
+Ninguna entrega el nombre del programa. `now-playing.js` consulta la de
+Triton cada 20 s mientras la radio se oye (no abre otra conexión de audio).
+La canción se muestra arriba a la izquierda (a la derecha si ahí está el
+reloj), con la carátula, y también en «♪ Estaciones» y en los controles. No se
+muestra durante una tanda comercial ni si la última canción empezó hace más de
+12 minutos (probablemente ya es un programa hablado). Se apaga en
+Configuración › Radio › Mostrar la canción en pantalla.

@@ -34,6 +34,8 @@ Una fase solo se da por terminada después de probarla en el iPad real
 3. En **♪ Estaciones** eliges una estación; suena al tocarla. **Escanear**
    pasa por todas, 5 segundos cada una y sin silencios entre ellas; toca
    cualquier cosa para quedarte en la que suena. El volumen se ajusta con los botones del iPad.
+   En las estaciones de Triton se ve arriba la canción que suena, con su
+   carátula (se apaga en Configuración › Radio).
 4. **📍 Todas** filtra las fotos por país y por rango de años (deslizador
    doble). La primera vez el marco revisa las fotos en segundo plano (unas 4
    horas para 40 000 fotos); las cifras crecen mientras tanto.

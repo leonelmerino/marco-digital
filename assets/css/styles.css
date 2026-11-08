@@ -47,6 +47,34 @@ button, select, input { font: inherit; }
 }
 .layer.visible { opacity: 1; }
 body.transition-none .layer { -webkit-transition: none; transition: none; }
+/* Al deslizar: fundido corto, también con «Corte directo». */
+.layer.quick,
+body.transition-none .layer.quick {
+  -webkit-transition: opacity 0.25s ease-out;
+  transition: opacity 0.25s ease-out;
+}
+
+/* Aviso de que el gesto se recibió mientras carga la vista. */
+.nav-hint {
+  position: fixed;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  margin-top: -28px;
+  border-radius: 28px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 34px;
+  line-height: 52px;
+  text-align: center;
+  pointer-events: none;
+  -webkit-animation: pulse 1s ease-in-out infinite alternate;
+  animation: pulse 1s ease-in-out infinite alternate;
+}
+.nav-hint.forward { right: 24px; }
+.nav-hint.back { left: 24px; }
+@-webkit-keyframes pulse { from { opacity: 0.35; } to { opacity: 1; } }
+@keyframes pulse { from { opacity: 0.35; } to { opacity: 1; } }
 
 /* Celdas: una (foto sola) a tres (grilla). Su posición la fija slideshow.js.
    En la grilla las fotos llenan su celda recortando; sola, según «Ajuste». */
@@ -199,6 +227,32 @@ body.controls-visible .controls { opacity: 1; pointer-events: auto; }
 .radio-now.error { color: #ff9f8f; }
 
 /* ---------- Radio ---------- */
+
+/* Canción que suena, arriba a la izquierda (a la derecha si ahí está el reloj). */
+.song {
+  position: fixed;
+  top: 24px; left: 28px;
+  max-width: 45%;
+  overflow: hidden;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.6);
+}
+body.song-right .song { left: auto; right: 28px; text-align: right; }
+.song-cover {
+  float: left;
+  width: 44px;
+  height: 44px;
+  margin-right: 10px;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+}
+body.song-right .song-cover { float: right; margin: 0 0 0 10px; }
+.song-text { overflow: hidden; padding-top: 2px; }
+.song-title, .song-artist { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.song-title { font-size: 15px; font-weight: 600; }
+.song-artist { font-size: 14px; color: rgba(255, 255, 255, 0.85); }
+.radio-song { font-size: 14px; color: #8e8e93; margin-top: 3px; }
 
 .radio-player {
   display: -webkit-flex;

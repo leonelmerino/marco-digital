@@ -24,6 +24,7 @@
     theme: 'normal',
     radioStation: Frame.radioStations.length ? Frame.radioStations[0].id : '',
     radioVolume: 80,
+    radioInfo: true,
     dropboxRecursive: true,
     debug: false
   };
