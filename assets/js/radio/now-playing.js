@@ -10,8 +10,12 @@
  * y no dejan pedirlo desde una página web; además las de noticias lo mandan
  * vacío. Para ellas no se muestra nada.
  *
- * Si lo último fue una tanda comercial, o la canción empezó hace más de 12
- * minutos (probablemente ya es un programa hablado), no se muestra canción.
+ * Triton publica eventos sueltos: «empieza esta canción» y «empieza una
+ * tanda de 60 s». No avisa cuando vuelve un programa hablado o una canción
+ * sin registrar, así que:
+ * - la tanda solo cuenta mientras dura (su duración más un margen);
+ * - una canción que empezó hace más de 12 minutos ya no cuenta;
+ * - si lo último ya venció, no se sabe qué suena (null).
  */
 (function (global) {
   'use strict';
@@ -19,6 +23,7 @@
   var Frame = global.Frame = global.Frame || {};
 
   var NP_URL = 'https://np.tritondigital.com/public/nowplaying?numberToFetch=1&mountName=';
+  var AD_MARGIN_MS = 30000;
   var POLL_MS = 20000;
   var STALE_MS = 12 * 60 * 1000;
   var MOUNT = /streamtheworld\.com\/api\/livestream-redirect\/([A-Z0-9_]+?)(?:_SC)?$/;
@@ -51,8 +56,11 @@
     var props = {};
     var list = item.getElementsByTagName('property');
     for (var i = 0; i < list.length; i++) props[list[i].getAttribute('name')] = list[i].textContent;
-    if (item.getAttribute('type') !== 'track') return { kind: 'ad' };
     var start = Number(props.cue_time_start) || 0;
+    if (item.getAttribute('type') !== 'track') {
+      var duration = Number(props.cue_time_duration) || 60000;
+      return start && Date.now() < start + duration + AD_MARGIN_MS ? { kind: 'ad' } : null;
+    }
     if (start && Date.now() - start > STALE_MS) return null;
     if (!props.cue_title) return null;
     return {

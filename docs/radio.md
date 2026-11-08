@@ -93,8 +93,13 @@ Revisión del 08-11-2026 de los datos que trae cada señal:
 
 Ninguna entrega el nombre del programa. `now-playing.js` consulta la de
 Triton cada 20 s mientras la radio se oye (no abre otra conexión de audio).
-La canción se muestra arriba a la izquierda (a la derecha si ahí está el
-reloj), con la carátula, y también en «♪ Estaciones» y en los controles. No se
-muestra durante una tanda comercial ni si la última canción empezó hace más de
-12 minutos (probablemente ya es un programa hablado). Se apaga en
-Configuración › Radio › Mostrar la canción en pantalla.
+
+Mientras la radio suena hay una etiqueta fija junto al reloj (encima si el
+reloj está abajo; sigue visible aunque se oculte el reloj): la canción, el
+artista y la carátula si se saben; si no, la estación y su género, o
+«Comerciales» durante una tanda. Triton solo avisa cuándo empieza cada
+canción o tanda, no cuándo vuelve un programa hablado: la tanda cuenta
+mientras dura (60 s más 30 s de margen) y una canción, hasta 12 minutos. Por
+eso Futuro o ADN, que en algunos programas no publican canciones, muestran
+solo la estación. Se apaga en Configuración › Radio › Mostrar la canción en
+pantalla.

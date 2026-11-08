@@ -77,7 +77,7 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 57 | Años variados | Mirar 20 vistas | Salen años distintos, no casi solo los recientes | |
 | 58 | Grilla por color | Mirar varias grillas | Las fotos de una grilla tienen colores o épocas del año parecidas; el diagnóstico no muestra errores de get_thumbnail_batch | |
 | 59 | Deslizar rápido | Deslizar una vez | La foto cambia enseguida (fundido corto) o aparece una flecha en el borde mientras carga; un segundo gesto durante la carga no salta otra | |
-| 60 | Canción en pantalla | Poner Corazón o Futuro | Arriba a la izquierda: canción, artista y carátula; cambia con la canción (hasta 20 s de retraso) | |
+| 60 | Canción en pantalla | Poner Corazón | Junto al reloj, sin tocar la pantalla: canción, artista y carátula; cambia con la canción (hasta 20 s de retraso); en una tanda dice «Comerciales» y luego vuelve | |
 | 61 | Canción: apagar | Configuración › Radio › Mostrar la canción: desactivar | Desaparece de la pantalla; en ♪ Estaciones sigue el texto | |
 | 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 

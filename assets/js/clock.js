@@ -71,7 +71,7 @@
     options.format = settings.clockFormat;
     options.showDate = settings.dateVisible;
     rootEl.className = 'clock pos-' + settings.clockPosition + ' size-' + settings.clockSize +
-      (settings.clockVisible ? '' : ' hidden');
+      (settings.clockVisible ? '' : ' clock-off'); // la radio puede seguir visible ahí
     dateEl.className = settings.dateVisible ? 'clock-date' : 'clock-date hidden';
     refresh();
   }

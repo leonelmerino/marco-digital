@@ -31,7 +31,7 @@
     setBodyClass('info-hidden', !s.photoInfo);
     // La leyenda va en la esquina inferior que no ocupa el reloj.
     setBodyClass('captions-right', s.clockVisible && s.clockPosition === 'bottom-left');
-    setBodyClass('song-right', s.clockVisible && s.clockPosition === 'top-left');
+    placeSong(s.clockPosition);
     Frame.compat.setDebugVisible(s.debug);
   }
 
@@ -168,6 +168,7 @@
 
     // Solo se pregunta qué suena mientras la radio se oye.
     Frame.nowPlaying.watch(state.status === 'playing' ? station : null);
+    renderSong(Frame.nowPlaying.get());
 
     var now = $('radio-now');
     if (state.status === 'off') {
@@ -189,23 +190,44 @@
     return info.title + (info.artist ? ' — ' + info.artist : '');
   }
 
+  // Con el reloj abajo, la radio va encima de la hora; arriba o al centro, debajo.
+  function placeSong(position) {
+    var song = $('song');
+    var above = position.indexOf('bottom') === 0;
+    if (above) $('clock').insertBefore(song, $('clock-time'));
+    else $('clock').appendChild(song);
+    song.setAttribute('data-place', above ? 'above' : 'below');
+    renderSong(Frame.nowPlaying.get());
+  }
+
+  // Etiqueta permanente mientras la radio se oye: la canción (con carátula)
+  // si se sabe, y si no la estación.
   function renderSong(info) {
-    var show = Frame.settings.get().radioInfo && info && info.kind === 'track';
-    $('song').className = show ? 'song' : 'song hidden';
+    var state = Frame.radio.getState();
+    var station = state.status === 'playing' ? state.station : null;
+    var song = $('song');
+    var show = Frame.settings.get().radioInfo && !!station;
+    song.className = 'song ' + (song.getAttribute('data-place') || 'above') + (show ? '' : ' hidden');
+    var cover = $('song-cover');
+    var track = info && info.kind === 'track' ? info : null;
     if (show) {
-      $('song-title').textContent = info.title;
-      $('song-artist').textContent = info.artist + (info.album && info.album !== info.title ? ' · ' + info.album : '');
-      var cover = $('song-cover');
-      if (info.cover) {
-        if (cover.getAttribute('src') !== info.cover) cover.src = info.cover;
-        cover.className = 'song-cover';
+      var where = station.name + ' ' + station.freq;
+      if (track) {
+        $('song-title').textContent = track.title;
+        $('song-artist').textContent = (track.artist ? track.artist + ' · ' : '') + where;
       } else {
-        cover.removeAttribute('src');
-        cover.className = 'song-cover hidden';
+        $('song-title').textContent = '\u266A ' + where;
+        $('song-artist').textContent = info && info.kind === 'ad' ? 'Comerciales' : station.genre;
       }
     }
+    if (show && track && track.cover) {
+      if (cover.getAttribute('src') !== track.cover) cover.src = track.cover;
+      cover.className = 'song-cover';
+    } else {
+      cover.removeAttribute('src');
+      cover.className = 'song-cover hidden';
+    }
     $('radio-song').textContent = info ? '♫ ' + songText(info) : '';
-    updateRadioUI(Frame.radio.getState());
   }
 
   function stopScanHere() {
@@ -228,7 +250,10 @@
     Frame.radio.init(Frame.radioStations, settings.radioStation);
     Frame.radio.setVolume(settings.radioVolume);
     Frame.radio.onChange(updateRadioUI);
-    Frame.nowPlaying.onChange(renderSong);
+    Frame.nowPlaying.onChange(function (info) {
+      renderSong(info);
+      updateRadioUI(Frame.radio.getState()); // texto en los controles
+    });
     updateRadioUI(Frame.radio.getState());
     // Una carátula que no carga no debe dejar un hueco.
     $('song-cover').addEventListener('error', function () { $('song-cover').className = 'song-cover hidden'; });
