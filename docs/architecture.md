@@ -31,6 +31,9 @@ Cada archivo es un IIFE que añade un módulo al espacio de nombres global
 | `photo-filter.js` | `Frame.photoFilter` | Filtro por país y rango de años; cifras para el panel. |
 | `filter-ui.js` | `Frame.filterUI` | Panel «Filtrar fotos»: países, barras por año y deslizador doble táctil. |
 | `dropbox/library.js` | `Frame.dropboxLibrary` | Lista por páginas, muestreo, cambios cada 30 min, cargador de miniaturas con fecha y ubicación, explorador. |
+| `alarm.js` | `Frame.alarm` | Horarios del despertador y próxima alarma. |
+| `night.js` | `Frame.night` | Modo noche, amanecer, sonar (radio o tono), posponer y apagar. Ver `docs/alarm.md`. |
+| `alarm-ui.js` | `Frame.alarmUI` | Panel «Despertador» y botón ⏰ de los controles. |
 | `app.js` | — | Arranque, controles, configuración, radio, conectividad, ciclo de vida. |
 
 Ver [dropbox.md](dropbox.md) para el flujo de Dropbox y las carpetas grandes.

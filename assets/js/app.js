@@ -651,6 +651,7 @@
     Frame.slideshow.resume();
     Frame.radio.resume();
     Frame.photoIndex.resume();
+    Frame.night.tick();
     updateConnectivity();
   }
 
@@ -712,6 +713,9 @@
     });
     Frame.photoIndex.onChange(onIndexChange);
     bindDropbox();
+    Frame.alarm.load();
+    Frame.alarmUI.init(hideControls);
+    Frame.night.init({ onChange: Frame.alarmUI.updateButton });
     bindLifecycle();
     updateConnectivity();
     updatePlayButton();

@@ -335,7 +335,24 @@
     }
   }
 
+  // Dentro de un toque: deja los dos <audio> habilitados para sonar después
+  // sin toque (el despertador). Reproduce un silencio corto y lo suelta.
+  function unlock(silentUrl) {
+    for (var i = 0; i < channels.length; i++) {
+      var ch = channels[i];
+      if (inUse(ch)) continue;
+      ch.attemptId++;
+      ch.el.src = silentUrl;
+      var promise = ch.el.play();
+      if (promise && typeof promise.catch === 'function') promise.catch(function () { /* se verá al sonar */ });
+    }
+    setTimeout(function () {
+      for (var j = 0; j < channels.length; j++) if (!inUse(channels[j])) release(channels[j]);
+    }, 1000);
+  }
+
   Frame.radio = {
+    unlock: unlock,
     init: function (stationList, initialId) {
       stations = stationList;
       channels = [

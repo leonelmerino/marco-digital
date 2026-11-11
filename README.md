@@ -18,6 +18,7 @@ Funciona en Safari, sin instalar nada en el iPad, y se publica con GitHub Pages.
 | 3d | Filtro por país y rango de años (índice en segundo plano) | Implementada; pendiente de probar en el iPad |
 | 3e | Varias carpetas, deslizar adelante/atrás, orden que mezcla años, grilla por color y fecha | Implementada; pendiente de probar en el iPad |
 | 4 | Radio por internet: 14 estaciones chilenas predefinidas y función Escanear (sustituye a Internet Archive) | Implementada; validada en parte en el iPad |
+| 3f | Despertador: modo noche, amanecer, radio con tono de respaldo, posponer | Implementado; pendiente de probar una noche en el iPad |
 | 5 | Endurecimiento y uso prolongado | Sin empezar |
 
 Una fase solo se da por terminada después de probarla en el iPad real
@@ -43,10 +44,17 @@ Una fase solo se da por terminada después de probarla en el iPad real
    teléfono (QR)**: escaneas el código con el iPhone, inicias sesión allí y
    escribes en el iPad el código que muestra Dropbox. Luego agregas una o
    varias carpetas (**Agregar carpeta**; cada una se puede quitar).
-6. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
+6. **⏰ Despertador**: hora de lunes a viernes y de fin de semana, radio y
+   minutos de amanecer. Al acostarte tocas **Dormir**: la pantalla queda en
+   negro con el reloj tenue; antes de la hora las fotos aparecen de a poco y a
+   la hora suena la radio (o un tono si la radio no conecta). **Posponer 5 min**
+   las veces que quieras o **Apagar**. El iPad debe quedar enchufado, con
+   Bloqueo automático en «Nunca», el volumen alto y el marco al frente.
+   **Probar en 1 minuto** sirve para comprobarlo.
+7. En **Configuración** puedes cambiar el intervalo, el orden, la transición,
    el ajuste de la foto, si se agrupan las fotos verticales, el lugar y la
    fecha de cada foto, el reloj, la fecha y el modo nocturno.
-7. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
+8. Para que la pantalla no se apague: **Ajustes › Pantalla y brillo ›
    Bloqueo automático › Nunca**. Para que nadie salga de Safari, puedes usar
    **Acceso Guiado** (Ajustes › Accesibilidad).
 

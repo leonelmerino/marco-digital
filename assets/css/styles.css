@@ -295,6 +295,82 @@ body.controls-visible .controls { opacity: 1; pointer-events: auto; }
 .radio-status.error { color: #ff6b5b; }
 .row input[type="range"] { width: 55%; margin-left: 16px; }
 
+/* ---------- Modo noche y despertador ---------- */
+
+/* Sobre las fotos y las leyendas; el reloj (después en el HTML) queda encima. */
+.night {
+  position: fixed;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: #000;
+  opacity: 1;
+  cursor: pointer;
+  /* La duración del amanecer la fija night.js. */
+  -webkit-transition-property: opacity;
+  transition-property: opacity;
+  -webkit-transition-timing-function: ease-in;
+  transition-timing-function: ease-in;
+}
+.night.fading { opacity: 0; }
+body.sleeping .clock { opacity: 0.3; }
+.night-info {
+  position: absolute;
+  top: 24px; left: 0; right: 0;
+  text-align: center;
+  font-size: 15px;
+  color: #fff;
+  opacity: 0.3; /* con opacity también se atenúa el emoji ⏰ */
+}
+.btn-night-exit {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 280px;
+  margin: -28px 0 0 -140px;
+  height: 56px;
+  border: 0;
+  border-radius: 28px;
+  background: #2c2c2e;
+  color: #f2f2f2;
+  font-size: 18px;
+}
+
+.ring {
+  position: fixed;
+  top: 50%; left: 50%;
+  width: 520px;
+  margin: -130px 0 0 -260px;
+  padding: 24px 0;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  text-align: center;
+}
+.ring-time { font-size: 72px; font-weight: 200; line-height: 1.1; }
+.ring-buttons { padding-top: 16px; }
+.ring-buttons button {
+  display: inline-block;
+  height: 64px;
+  margin: 0 10px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 32px;
+  font-size: 22px;
+  color: #fff;
+}
+.ring-snooze { background: #0a84ff; }
+.ring-dismiss { background: #48484a; }
+.ring-note { font-size: 15px; color: #ff9f8f; padding-top: 10px; }
+/* Pospuesta: un aviso pequeño arriba, con «Apagar». */
+.ring.snoozed {
+  top: 20px;
+  width: 360px;
+  margin: 0 0 0 -180px;
+  padding: 10px 0;
+}
+.ring.snoozed .ring-time { font-size: 22px; font-weight: 600; display: inline-block; vertical-align: middle; }
+.ring.snoozed .ring-buttons { display: inline-block; vertical-align: middle; padding: 0 0 0 12px; }
+.ring.snoozed .ring-snooze { display: none; }
+.ring.snoozed .ring-dismiss { height: 40px; font-size: 16px; padding: 0 18px; }
+.time-input { margin-left: 16px; font-size: 17px; }
+
 /* ---------- Filtro ---------- */
 
 .filter-total { font-size: 20px; font-weight: 600; padding: 4px 0 0; }

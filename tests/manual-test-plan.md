@@ -79,6 +79,10 @@ URL local (misma Wi-Fi que el Mac): `http://<IP-del-Mac>:8010`
 | 59 | Deslizar rápido | Deslizar una vez | La foto cambia enseguida (fundido corto) o aparece una flecha en el borde mientras carga; un segundo gesto durante la carga no salta otra | |
 | 60 | Canción en pantalla | Poner Corazón | Junto al reloj, sin tocar la pantalla: canción, artista y carátula; cambia con la canción (hasta 20 s de retraso); en una tanda dice «Comerciales» y luego vuelve | |
 | 61 | Canción: apagar | Configuración › Radio › Mostrar la canción: desactivar | Desaparece de la pantalla; en ♪ Estaciones sigue el texto | |
+| 62 | Despertador: prueba corta | ⏰ › elegir radio › Probar en 1 minuto; no tocar nada | Pantalla negra con reloj tenue; a los 30 s aparecen las fotos; al minuto suena la radio con Posponer y Apagar | |
+| 63 | Despertador: tono de respaldo | Modo avión, Probar en 1 minuto | A los ~15 s de la hora suena la campanita | |
+| 64 | Despertador: posponer | Durante la alarma, Posponer 5 min (dos veces) | Silencio, «⏰ hh:mm» arriba; vuelve a sonar a los 5 min | |
+| 65 | Despertador: una noche | Dormir con la alarma de la mañana | Suena a la hora con amanecer previo; anotar si sonó la radio o el tono | |
 | 36 | Radio desde los controles | Tocar «▶ Radio» y luego «❚❚ Radio» | Suena la estación elegida; el botón se pone azul; al pausar se detiene | |
 
 ## Cómo registrar un fallo
