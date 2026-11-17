@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Marco · Spotify</title>
+<!--
+  Página de retorno de Spotify para Marco en el Apple TV (repo marco-tv).
+
+  Spotify solo acepta direcciones de retorno HTTPS, y la TV no tiene
+  navegador. El teléfono inicia sesión y Spotify vuelve aquí con
+  ?code=…&state=…. `state` lleva la dirección local de la TV
+  (http://192.168.x.x:8010/<clave>), que solo existe mientras la TV muestra
+  «Conectar Spotify». Esta página manda el código a esa dirección.
+
+  - No guarda nada, no carga scripts de terceros y no envía datos a ningún
+    otro sitio.
+  - Solo redirige a direcciones de red privada (192.168.x.x, 10.x.x.x,
+    172.16–31.x.x) con la forma exacta que genera la TV.
+  - El código es de un solo uso y no sirve sin el verificador PKCE que guarda
+    la TV.
+-->
+<style>
+  body { font: 17px -apple-system, system-ui, sans-serif; margin: 0; padding: 24px; background: #111; color: #eee; max-width: 520px; }
+  h2 { font-weight: 600; }
+  a.btn { display: block; padding: 14px; border-radius: 12px; background: #1db954; color: #000; font-weight: 600; text-align: center; text-decoration: none; margin: 16px 0; }
+  code { display: block; padding: 12px; background: #222; border-radius: 8px; word-break: break-all; user-select: all; }
+  .err { color: #ff6b6b; }
+</style>
+</head>
+<body>
+<h2>Marco · Spotify</h2>
+<p id="msg">Un momento…</p>
+<div id="extra"></div>
+<script>
+(function () {
+  'use strict';
+  var msg = document.getElementById('msg');
+  var extra = document.getElementById('extra');
+  var params = new URLSearchParams(location.search);
+  // Que el código no quede en el historial ni en la barra de direcciones.
+  history.replaceState(null, '', location.pathname);
+
+  function fromBase64url(text) {
+    try { return atob(text.replace(/-/g, '+').replace(/_/g, '/')); } catch (e) { return ''; }
+  }
+
+  var PRIVATE = /^http:\/\/(192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}):\d{2,5}\/[A-Za-z0-9_-]{8,32}$/;
+
+  if (params.get('error')) {
+    msg.className = 'err';
+    msg.textContent = 'Spotify no dio permiso (' + params.get('error') + '). Vuelve a escanear el QR en la TV.';
+    return;
+  }
+  var code = params.get('code');
+  var tv = fromBase64url(params.get('state') || '');
+  if (!code || !PRIVATE.test(tv)) {
+    msg.className = 'err';
+    msg.textContent = 'Esta página solo sirve al conectar Marco con Spotify desde el QR de la TV.';
+    return;
+  }
+  msg.textContent = 'Enviando el permiso a la TV…';
+  var url = tv + '?code=' + encodeURIComponent(code);
+  var link = document.createElement('a');
+  link.className = 'btn';
+  link.href = url;
+  link.textContent = 'Enviar a la TV';
+  extra.appendChild(document.createTextNode('Si no pasa nada en unos segundos, revisa que el teléfono esté en la misma red Wi-Fi que la TV y toca:'));
+  extra.appendChild(link);
+  location.href = url;
+})();
+</script>
+</body>
+</html>
